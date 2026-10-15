@@ -60,11 +60,11 @@ flowchart LR
 
 | Stage | What we did | Evidence |
 |---|---|---|
-| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | `docs/evidence/01_requirement.png` |
-| 2. Pipeline IR | `nvurisrcbin (demo.mp4) -> nvstreammux -> nvinfer (yolov8n-ppe) -> nvtracker -> nvdsanalytics (zones) -> nvmsgbroker (MQTT) + nvmsgconv (JSON)` | `docs/evidence/02_pipeline_ir_graph.png` |
-| 3. Model | `yolov8n-person-ppe` (CraftifAI Catalog / Deep Search) detecting person, hardhat, vest | `docs/evidence/03_model_selection.png` |
-| 4. Compiler | TensorRT FP16 (94.6 FPS) and INT8 (156.3 FPS) compiled engines | `docs/evidence/04_tensorrt_speed_fp16.png`, `05_tensorrt_speed_int8.png` |
-| 5. Run | Local GPU run on `demo.mp4`, publishing to Mosquitto MQTT & `/tmp/pipegen_out` JSON | `docs/evidence/06_live_run.png` |
+| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | [`pipegen_export/pipeline.json`](pipegen_export/pipeline.json) |
+| 2. Pipeline IR | `nvurisrcbin (demo.mp4) -> nvstreammux -> nvinfer (yolov8n-ppe) -> nvtracker -> nvdsanalytics (zones) -> nvmsgbroker (MQTT) + nvmsgconv (JSON)` | [`docs/evidence/pipegen_ir_graph.svg`](docs/evidence/pipegen_ir_graph.svg) · [`03_pipeline_and_evidence.png`](docs/evidence/03_pipeline_and_evidence.png) |
+| 3. Model | `yolov8n-person-ppe` detecting person, hardhat, vest | [`docs/evidence/03_pipeline_and_evidence.png`](docs/evidence/03_pipeline_and_evidence.png) |
+| 4. Compiler | TensorRT FP16 (94.6 FPS) and INT8 (156.3 FPS) compiled engines | [`docs/evidence/tensorrt_speed_report.svg`](docs/evidence/tensorrt_speed_report.svg) · [`04_tensorrt_benchmarks.png`](docs/evidence/04_tensorrt_benchmarks.png) |
+| 5. Run & Dashboard | Real-time edge monitor on `demo.mp4`, ingesting MQTT & JSON telemetry | [`docs/evidence/01_live_dashboard.png`](docs/evidence/01_live_dashboard.png) · [`02_incidents_management.png`](docs/evidence/02_incidents_management.png) |
 
 **Inputs:** `demo.mp4` (video file) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification · **Precision:** FP16 (primary), INT8 (Edge Optimization bonus) · **Outputs:** Mosquitto MQTT (`pipegen/detections`), JSON metadata, annotated video feed
 
