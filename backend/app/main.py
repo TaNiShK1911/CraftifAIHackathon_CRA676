@@ -120,13 +120,16 @@ Path("data/snapshots").mkdir(parents=True, exist_ok=True)
 @app.get("/media/video")
 async def serve_video():
     from fastapi.responses import FileResponse
-    video = Path(settings.media_video_path)
-    if video.exists():
-        return FileResponse(str(video), media_type="video/mp4")
-    # Fallback: check data directory
-    fallback = _data_dir / "annotated.mp4"
-    if fallback.exists():
-        return FileResponse(str(fallback), media_type="video/mp4")
+    candidates = [
+        Path(settings.media_video_path),
+        _data_dir / "annotated.mp4",
+        Path("demo.mp4"),
+        Path("../demo.mp4"),
+        Path("d:/btech/projects/hackwithblr-trial/demo.mp4"),
+    ]
+    for video in candidates:
+        if video.is_file():
+            return FileResponse(str(video.resolve()), media_type="video/mp4")
     from fastapi import HTTPException
     raise HTTPException(status_code=404, detail="Annotated video not available")
 

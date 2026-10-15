@@ -6,7 +6,7 @@ SiteGuard is a real-time safety monitor for construction sites and factories. A 
 
 Built for the **[Embedded SF: CraftifAI Physical AI Hackathon](https://luma.com/5z8w42mq)** (HackwithBangalore 4.0) — **Track A: PipeGen**, with the **Edge Optimization** bonus.
 
-> Team: `<your name / team>` · Demo video: `<link>` · Submission: `<link>`
+> **Track:** Track A — PipeGen (Perception) · **Bonus:** Edge Optimization (INT8) · **Repository:** [SiteGuard](https://github.com/TaNiShK1911/SiteGuard)
 
 ---
 
