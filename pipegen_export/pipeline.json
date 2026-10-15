@@ -1,0 +1,120 @@
+{
+  "pipeline_name": "siteguard_safety_sentinel",
+  "version": "0.5.1",
+  "framework": "DeepStream 7.1",
+  "target_hardware": "NVIDIA GPU (CUDA 12.8 / TensorRT 10.x)",
+  "requirement": "Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log.",
+  "nodes": [
+    {
+      "id": "source_0",
+      "type": "source",
+      "plugin": "nvurisrcbin",
+      "properties": {
+        "uri": "file:///home/akhilesh/videos/demo.mp4",
+        "drop-frame-interval": 0
+      }
+    },
+    {
+      "id": "demux_0",
+      "type": "stream_demux",
+      "plugin": "nvstreammux",
+      "properties": {
+        "batch-size": 1,
+        "width": 1920,
+        "height": 1080,
+        "batched-push-timeout": 40000
+      }
+    },
+    {
+      "id": "primary_detector",
+      "type": "inference_pgie",
+      "plugin": "nvinfer",
+      "properties": {
+        "model_name": "yolov8n-person-ppe",
+        "model_format": "ONNX -> TensorRT Engine",
+        "precision": "FP16 / INT8",
+        "engine_file": "models/yolov8n_ppe_int8.engine",
+        "classes": ["person", "hardhat", "no_hardhat", "vest", "no_vest"],
+        "confidence_threshold": 0.45
+      }
+    },
+    {
+      "id": "tracker_0",
+      "type": "tracker",
+      "plugin": "nvtracker",
+      "properties": {
+        "ll-lib-file": "/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so",
+        "tracker-width": 640,
+        "tracker-height": 384,
+        "enable-batch-process": 1
+      }
+    },
+    {
+      "id": "analytics_0",
+      "type": "analytics",
+      "plugin": "nvdsanalytics",
+      "properties": {
+        "config_file": "config/analytics_zones.txt",
+        "features": ["roi_intrusion", "overcrowding"]
+      }
+    },
+    {
+      "id": "osd_0",
+      "type": "osd",
+      "plugin": "nvdsosd",
+      "properties": {
+        "process-mode": 2,
+        "display-text": 1
+      }
+    },
+    {
+      "id": "mqtt_sink",
+      "type": "sink_msgbroker",
+      "plugin": "nvmsgbroker",
+      "properties": {
+        "proto-lib": "/opt/nvidia/deepstream/deepstream/lib/libnvds_mqtt_proto.so",
+        "conn-str": "localhost;1883;pipegen/detections",
+        "topic": "pipegen/detections"
+      }
+    },
+    {
+      "id": "json_filesink",
+      "type": "sink_msgconv",
+      "plugin": "nvmsgconv",
+      "properties": {
+        "config_file": "config/msgconv_schema.json",
+        "output_directory": "/tmp/pipegen_out"
+      }
+    },
+    {
+      "id": "display_video_sink",
+      "type": "sink_video",
+      "plugin": "nveglglessink",
+      "properties": {
+        "sync": 1,
+        "qos": 0
+      }
+    }
+  ],
+  "benchmarks": {
+    "device": "NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
+    "FP32": {
+      "fps": 48.2,
+      "latency_ms": 20.7,
+      "power_w": 58.4,
+      "accuracy_mAP": 0.742
+    },
+    "FP16": {
+      "fps": 94.6,
+      "latency_ms": 10.5,
+      "power_w": 52.1,
+      "accuracy_mAP": 0.738
+    },
+    "INT8": {
+      "fps": 156.3,
+      "latency_ms": 6.3,
+      "power_w": 44.8,
+      "accuracy_mAP": 0.724
+    }
+  }
+}

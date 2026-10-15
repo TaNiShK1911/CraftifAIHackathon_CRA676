@@ -51,7 +51,6 @@ def test_adapter_zone_intrusion_event():
 def test_adapter_ppe_violation_event():
     payload = _load_fixture()
     events = normalize(payload)
-    ppe_events = [e for e in events if "hardhat" in ev.label or "vest" in ev.label for ev in [e]]
     assert any("hardhat" in e.label or "vest" in e.label for e in events)
 
 

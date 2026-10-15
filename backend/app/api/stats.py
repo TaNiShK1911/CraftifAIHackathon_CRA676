@@ -67,7 +67,9 @@ def stats_summary(session: Session = Depends(get_session)) -> dict:
 
     return {
         "open": open_count,
+        "open_incidents": open_count,
         "today": today_count,
+        "total_incidents": today_count,
         "high_critical": high_crit,
         "mtta_seconds": mtta,
         "by_type": by_type,

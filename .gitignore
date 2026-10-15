@@ -31,3 +31,7 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Large installers and demo video binaries
+craftifai/*.deb
+*.mp4

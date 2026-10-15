@@ -4,7 +4,7 @@ Uses SQLite WAL mode (set in db.py) so the API can read while ingest writes.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlmodel import Field, SQLModel
@@ -48,7 +48,7 @@ class PipelineRunRow(SQLModel, table=True):
     __tablename__ = "pipeline_runs"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     model_name: str
     precision: str           # FP32 | FP16 | INT8
     engine_path: Optional[str] = None
@@ -63,7 +63,7 @@ class EvidenceRow(SQLModel, table=True):
     __tablename__ = "evidence"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     kind: str                # "screenshot" | "speed_report" | "video" | etc.
     title: str
     file_path: Optional[str] = None

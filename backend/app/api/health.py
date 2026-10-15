@@ -27,6 +27,7 @@ async def health() -> dict:
         age = round(time.monotonic() - last_ts, 1)
 
     return {
+        "ok": True,
         "status": "ok",
         "mqtt_connected": mqtt_state.get("connected", False),
         "last_message_age_s": age,

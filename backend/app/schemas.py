@@ -5,7 +5,7 @@ The adapter converts raw PipeGen output into CanonicalEvent; everything else dep
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -41,7 +41,7 @@ class IncidentStatus(str, Enum):
 
 class CanonicalEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    ts: datetime = Field(default_factory=datetime.utcnow)
+    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     source_id: str                          # camera / stream id e.g. "cam0"
     frame_id: int | None = None
     track_id: int | None = None             # tracker id if PipeGen tracking enabled

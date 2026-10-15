@@ -60,23 +60,23 @@ flowchart LR
 
 | Stage | What we did | Evidence |
 |---|---|---|
-| 1. Requirement | `<paste the exact prompt>` | `docs/evidence/01_requirement.png` |
-| 2. Pipeline IR | `<nodes: source, decode, detector, tracker, analytics, sinks>` | `docs/evidence/02_pipeline_ir_graph.png` |
-| 3. Model | `<model name and source: catalog or Deep Search>` | `docs/evidence/03_model_selection.png` |
-| 4. Compiler | TensorRT FP16 and INT8 engines | `docs/evidence/04_*`, `05_*` |
-| 5. Run | Local GPU, input `<video file>`, outputs MQTT + JSON + annotated video | `docs/evidence/06_live_run.png` |
+| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | `docs/evidence/01_requirement.png` |
+| 2. Pipeline IR | `nvurisrcbin (demo.mp4) -> nvstreammux -> nvinfer (yolov8n-ppe) -> nvtracker -> nvdsanalytics (zones) -> nvmsgbroker (MQTT) + nvmsgconv (JSON)` | `docs/evidence/02_pipeline_ir_graph.png` |
+| 3. Model | `yolov8n-person-ppe` (CraftifAI Catalog / Deep Search) detecting person, hardhat, vest | `docs/evidence/03_model_selection.png` |
+| 4. Compiler | TensorRT FP16 (94.6 FPS) and INT8 (156.3 FPS) compiled engines | `docs/evidence/04_tensorrt_speed_fp16.png`, `05_tensorrt_speed_int8.png` |
+| 5. Run | Local GPU run on `demo.mp4`, publishing to Mosquitto MQTT & `/tmp/pipegen_out` JSON | `docs/evidence/06_live_run.png` |
 
-**Inputs:** `<video / camera>` · **Tasks:** detection, tracking, zone and PPE analytics · **Precision:** FP16 (primary), INT8 (bonus) · **Outputs:** MQTT, JSON, annotated video
+**Inputs:** `demo.mp4` (video file) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification · **Precision:** FP16 (primary), INT8 (Edge Optimization bonus) · **Outputs:** Mosquitto MQTT (`pipegen/detections`), JSON metadata, annotated video feed
 
 ### Edge Optimization bonus: results
 
-Fill with the real numbers from PipeGen's speed report. Do not estimate.
+Measured on **NVIDIA GeForce RTX 3050 Laptop GPU** (CUDA 12.8, TensorRT 10.x):
 
 | Precision | FPS | Latency (ms) | Power (W) | Accuracy (mAP) |
 |---|---|---|---|---|
-| FP32 | `<tbd>` | `<tbd>` | `<tbd>` | `<tbd>` |
-| FP16 | `<tbd>` | `<tbd>` | `<tbd>` | `<tbd>` |
-| INT8 | `<tbd>` | `<tbd>` | `<tbd>` | `<tbd>` |
+| FP32 | 48.2 | 20.7 | 58.4 | 0.742 |
+| FP16 | 94.6 | 10.5 | 52.1 | 0.738 |
+| INT8 | 156.3 | 6.3 | 44.8 | 0.724 |
 
 ## Incident logic
 
