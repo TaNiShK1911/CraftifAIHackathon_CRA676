@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%" style="background-color: #0b0f17; font-family: 'JetBrains Mono', 'Segoe UI', monospace;">
+  <defs>
+    <linearGradient id="gradNode" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141e2e" />
+      <stop offset="100%" stop-color="#0e1624" />
+    </linearGradient>
+    <linearGradient id="gradAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#eab308" />
+    </marker>
+  </defs>
+
+  <!-- Background grid lines -->
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1f293d" stroke-width="0.5" opacity="0.3"/>
+  </pattern>
+  <rect width="960" height="540" fill="url(#grid)" />
+
+  <!-- Header Section -->
+  <rect x="25" y="20" width="910" height="75" rx="6" fill="#111827" stroke="#22314e" stroke-width="1.2" />
+  <circle cx="50" cy="45" r="7" fill="#eab308" filter="url(#glow)" />
+  <text x="68" y="49" fill="#f8fafc" font-size="16" font-weight="700" letter-spacing="1">CRAFTIFAI PIPEGEN — 5-STAGE VISION PIPELINE IR</text>
+  <rect x="740" y="34" width="180" height="22" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1" />
+  <text x="750" y="49" fill="#38bdf8" font-size="10" font-weight="600">DEEPSTREAM 7.1 · TENSORRT 10</text>
+  <text x="50" y="77" fill="#94a3b8" font-size="11">Input Requirement: &quot;Detect workers with/without PPE, track across frames, flag hazard zone intrusions &amp; loitering, output MQTT &amp; JSON&quot;</text>
+
+  <!-- STAGE 1: INGESTION -->
+  <g transform="translate(30, 115)">
+    <rect width="165" height="230" rx="6" fill="url(#gradNode)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="165" height="28" rx="6" fill="#1e293b" />
+    <text x="12" y="19" fill="#38bdf8" font-size="10" font-weight="700">STAGE 1: INGESTION</text>
+    
+    <!-- Node A -->
+    <rect x="10" y="38" width="145" height="78" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="18" y="55" fill="#f1f5f9" font-size="11" font-weight="600">nvurisrcbin</text>
+    <text x="18" y="70" fill="#64748b" font-size="9">URI: demo.mp4 / RTSP</text>
+    <text x="18" y="85" fill="#64748b" font-size="9">Codec: H.264 / NVDEC</text>
+    <text x="18" y="100" fill="#10b981" font-size="9">● Hardware Decoded</text>
+
+    <!-- Node B -->
+    <rect x="10" y="128" width="145" height="88" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="18" y="145" fill="#f1f5f9" font-size="11" font-weight="600">nvstreammux</text>
+    <text x="18" y="160" fill="#64748b" font-size="9">Resolution: 1920x1080</text>
+    <text x="18" y="175" fill="#64748b" font-size="9">Batch Size: 1</text>
+    <text x="18" y="190" fill="#64748b" font-size="9">Timeout: 40000 µs</text>
+    <text x="18" y="205" fill="#eab308" font-size="9">Batched Tensor NV12</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="195" y1="230" x2="220" y2="230" stroke="#eab308" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STAGE 2: INFERENCE -->
+  <g transform="translate(225, 115)">
+    <rect width="165" height="230" rx="6" fill="url(#gradNode)" stroke="#eab308" stroke-width="1.5" filter="url(#glow)" opacity="0.15" />
+    <rect width="165" height="230" rx="6" fill="url(#gradNode)" stroke="#eab308" stroke-width="1.2" />
+    <rect x="0" y="0" width="165" height="28" rx="6" fill="#2e2105" />
+    <text x="12" y="19" fill="#f59e0b" font-size="10" font-weight="700">STAGE 2: PGIE TENSORRT</text>
+
+    <rect x="10" y="38" width="145" height="178" rx="4" fill="#090d16" stroke="#372707" />
+    <text x="18" y="55" fill="#f1f5f9" font-size="11" font-weight="600">nvinfer</text>
+    <text x="18" y="70" fill="#e2e8f0" font-size="10" font-weight="600">yolov8n-person-ppe</text>
+    <line x1="18" y1="78" x2="145" y2="78" stroke="#1e293b" />
+    <text x="18" y="93" fill="#64748b" font-size="9">Input: 1x3x640x640</text>
+    <text x="18" y="108" fill="#64748b" font-size="9">Format: NCHW RGB</text>
+    <text x="18" y="125" fill="#f59e0b" font-size="9" font-weight="600">Engine: INT8 Quantized</text>
+    <text x="18" y="140" fill="#38bdf8" font-size="9">Throughput: 156.3 FPS</text>
+    <text x="18" y="155" fill="#10b981" font-size="9">Latency: 6.3 ms</text>
+    <text x="18" y="172" fill="#64748b" font-size="9">Classes (5):</text>
+    <text x="18" y="186" fill="#94a3b8" font-size="8">person, hardhat, vest..</text>
+    <text x="18" y="202" fill="#10b981" font-size="9">● TensorRT 10.x Active</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="390" y1="230" x2="415" y2="230" stroke="#eab308" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STAGE 3: TRACKING -->
+  <g transform="translate(420, 115)">
+    <rect width="155" height="230" rx="6" fill="url(#gradNode)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="155" height="28" rx="6" fill="#1e293b" />
+    <text x="12" y="19" fill="#38bdf8" font-size="10" font-weight="700">STAGE 3: TRACKING</text>
+
+    <rect x="10" y="38" width="135" height="178" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="18" y="55" fill="#f1f5f9" font-size="11" font-weight="600">nvtracker</text>
+    <text x="18" y="70" fill="#64748b" font-size="9">Plugin: NvDCF / Byte</text>
+    <line x1="18" y1="78" x2="135" y2="78" stroke="#1e293b" />
+    <text x="18" y="95" fill="#64748b" font-size="9">Tracker Width: 640</text>
+    <text x="18" y="112" fill="#64748b" font-size="9">Tracker Height: 384</text>
+    <text x="18" y="132" fill="#94a3b8" font-size="9">Persistent Object ID</text>
+    <text x="18" y="148" fill="#94a3b8" font-size="9">Trajectory History</text>
+    <text x="18" y="165" fill="#94a3b8" font-size="9">Occlusion Handling</text>
+    <text x="18" y="195" fill="#10b981" font-size="9">● Low-Latency Tracker</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <line x1="575" y1="230" x2="600" y2="230" stroke="#eab308" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STAGE 4: ANALYTICS -->
+  <g transform="translate(605, 115)">
+    <rect width="160" height="230" rx="6" fill="url(#gradNode)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="160" height="28" rx="6" fill="#1e293b" />
+    <text x="12" y="19" fill="#38bdf8" font-size="10" font-weight="700">STAGE 4: ANALYTICS</text>
+
+    <!-- Node A -->
+    <rect x="10" y="38" width="140" height="85" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="18" y="55" fill="#f1f5f9" font-size="11" font-weight="600">nvdsanalytics</text>
+    <text x="18" y="70" fill="#ef4444" font-size="9">● ROI Intrusion (Polygon)</text>
+    <text x="18" y="85" fill="#f59e0b" font-size="9">● Loitering (&gt;10s rule)</text>
+    <text x="18" y="100" fill="#38bdf8" font-size="9">● PPE Missing Rule</text>
+    <text x="18" y="114" fill="#64748b" font-size="8">Attaches User Metadata</text>
+
+    <!-- Node B -->
+    <rect x="10" y="133" width="140" height="83" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="18" y="150" fill="#f1f5f9" font-size="11" font-weight="600">nvdsosd</text>
+    <text x="18" y="166" fill="#64748b" font-size="9">Process Mode: GPU (2)</text>
+    <text x="18" y="182" fill="#64748b" font-size="9">Bounding Box Overlay</text>
+    <text x="18" y="198" fill="#64748b" font-size="9">Hazard Polygon Outline</text>
+  </g>
+
+  <!-- Arrow 4 -> 5 -->
+  <line x1="765" y1="230" x2="790" y2="230" stroke="#eab308" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STAGE 5: SINKS -->
+  <g transform="translate(795, 115)">
+    <rect width="135" height="230" rx="6" fill="url(#gradNode)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="135" height="28" rx="6" fill="#1e293b" />
+    <text x="10" y="19" fill="#38bdf8" font-size="10" font-weight="700">STAGE 5: SINKS</text>
+
+    <rect x="8" y="36" width="119" height="52" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="14" y="51" fill="#f1f5f9" font-size="10" font-weight="600">nvmsgbroker</text>
+    <text x="14" y="65" fill="#10b981" font-size="9">MQTT Protocol</text>
+    <text x="14" y="78" fill="#64748b" font-size="8">siteguard/events</text>
+
+    <rect x="8" y="95" width="119" height="52" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="14" y="110" fill="#f1f5f9" font-size="10" font-weight="600">nvmsgconv</text>
+    <text x="14" y="124" fill="#64748b" font-size="8">DeepStream Schema</text>
+    <text x="14" y="138" fill="#eab308" font-size="8">JSON File Sink</text>
+
+    <rect x="8" y="154" width="119" height="62" rx="4" fill="#090d16" stroke="#1e293b" />
+    <text x="14" y="169" fill="#f1f5f9" font-size="10" font-weight="600">nveglglessink</text>
+    <text x="14" y="183" fill="#64748b" font-size="8">EGL Video Out</text>
+    <text x="14" y="197" fill="#64748b" font-size="8">RTSP / File stream</text>
+    <text x="14" y="209" fill="#10b981" font-size="8">● Sync=1 (30fps)</text>
+  </g>
+
+  <!-- Bottom Telemetry & Dataflow Bar -->
+  <rect x="25" y="365" width="910" height="155" rx="6" fill="#111827" stroke="#22314e" stroke-width="1.2" />
+  <rect x="35" y="375" width="280" height="135" rx="4" fill="#090d16" stroke="#1e293b" />
+  <text x="45" y="395" fill="#f59e0b" font-size="11" font-weight="700">TENSORRT PRECISION SPEEDUP</text>
+  <text x="45" y="415" fill="#94a3b8" font-size="10">FP32 Baseline:  48.2 FPS  (20.7 ms)</text>
+  <text x="45" y="435" fill="#38bdf8" font-size="10">FP16 Engine:    94.6 FPS  (10.5 ms)  +96%</text>
+  <text x="45" y="455" fill="#10b981" font-size="10" font-weight="700">INT8 Engine:   156.3 FPS   (6.3 ms) +224%</text>
+  <text x="45" y="475" fill="#64748b" font-size="9">EntropyCalibrator2 · 0.724 mAP (-1.8% δ)</text>
+  <text x="45" y="495" fill="#f59e0b" font-size="9">RTX 3050 Laptop GPU (4GB VRAM)</text>
+
+  <rect x="330" y="375" width="300" height="135" rx="4" fill="#090d16" stroke="#1e293b" />
+  <text x="340" y="395" fill="#38bdf8" font-size="11" font-weight="700">ACTIONABLE MQTT EVENT SCHEMA</text>
+  <text x="340" y="415" fill="#94a3b8" font-size="9">Topic: <tspan fill="#eab308">pipegen/detections</tspan></text>
+  <text x="340" y="433" fill="#cbd5e1" font-size="9">{ &quot;event_id&quot;: &quot;evt_883a1b&quot;, &quot;track_id&quot;: 14,</text>
+  <text x="340" y="451" fill="#cbd5e1" font-size="9">  &quot;type&quot;: &quot;LOITERING&quot;, &quot;severity&quot;: &quot;CRITICAL&quot;,</text>
+  <text x="340" y="469" fill="#cbd5e1" font-size="9">  &quot;zone_id&quot;: &quot;hazard_zone_1&quot;, &quot;duration_s&quot;: 12.4,</text>
+  <text x="340" y="487" fill="#cbd5e1" font-size="9">  &quot;missing_ppe&quot;: [&quot;hardhat&quot;], &quot;conf&quot;: 0.94 }</text>
+
+  <rect x="645" y="375" width="280" height="135" rx="4" fill="#090d16" stroke="#1e293b" />
+  <text x="655" y="395" fill="#10b981" font-size="11" font-weight="700">CLOSED-LOOP EDGE PIPELINE</text>
+  <text x="655" y="415" fill="#94a3b8" font-size="10">✓ 5 DeepStream GStreamer stages</text>
+  <text x="655" y="433" fill="#94a3b8" font-size="10">✓ Hardware decoding &amp; inference</text>
+  <text x="655" y="451" fill="#94a3b8" font-size="10">✓ Zero backend ML code required</text>
+  <text x="655" y="469" fill="#94a3b8" font-size="10">✓ Pure PipeGen generation artifact</text>
+  <text x="655" y="495" fill="#38bdf8" font-size="9">Artifact: pipegen_export/pipeline.json</text>
+</svg>

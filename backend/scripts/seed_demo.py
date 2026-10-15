@@ -115,6 +115,27 @@ def seed():
             for inc in incidents:
                 session.add(inc)
 
+        # Check evidence
+        existing_evidence = session.exec(select(EvidenceRow)).all()
+        if not existing_evidence:
+            print("Seeding PipeGen IR graph and TensorRT report evidence...")
+            evidence_items = [
+                EvidenceRow(
+                    kind="ir_graph",
+                    title="CraftifAI PipeGen 5-Stage Vision Pipeline IR",
+                    file_path="data/evidence/pipegen_ir_graph.svg",
+                    description="PipeGen compiled 5-stage DeepStream 7.1 GStreamer pipeline with TensorRT 10 PGIE, NVTracker, NVDSAnalytics, and MQTT broker sink."
+                ),
+                EvidenceRow(
+                    kind="trt_report",
+                    title="NVIDIA TensorRT 10.x Benchmark & Speed Report",
+                    file_path="data/evidence/tensorrt_speed_report.svg",
+                    description="NVIDIA RTX 3050 Laptop GPU benchmark showing 3.24x speedup with INT8 quantization (156.3 FPS, 6.3ms latency) vs FP32 baseline."
+                ),
+            ]
+            for item in evidence_items:
+                session.add(item)
+
         session.commit()
     print("Database seeded successfully!")
 
