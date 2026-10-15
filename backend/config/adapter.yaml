@@ -1,0 +1,41 @@
+# adapter.yaml — Maps raw PipeGen MQTT/JSON payload fields to canonical schema fields.
+#
+# IMPORTANT: After running PipeGen once, capture a real message:
+#   mosquitto_sub -h localhost -t '#' -v
+# Then edit the values below to match the actual key names PipeGen uses.
+# Do NOT hard-code field names in Python; this file is the only source of truth.
+
+# Top-level message fields
+source_id:  "camera_id"       # key that holds the camera/stream identifier
+frame_id:   "frame_num"       # key that holds the frame number (int)
+timestamp:  "timestamp"       # epoch ms or ISO-8601; adapter handles both
+
+# Path inside the message that holds the list of per-object detections
+objects_path: "objects"
+
+# Per-object field mapping
+fields:
+  track_id:   "tracker_id"
+  label:      "class"
+  confidence: "conf"
+  bbox:       "bbox"          # list [x, y, w, h] or [x1, y1, x2, y2]
+  zone_id:    "roi"
+
+# bbox coordinate format coming from PipeGen
+bbox_format: "xyxy"           # "xyxy" | "xywh"
+
+# Native resolution used to normalise pixel bbox → 0..1 fractions
+# Adjust if PipeGen already emits normalised coordinates (set to [1, 1])
+frame_size: [1920, 1080]
+
+# Labels that indicate a hazard zone intrusion (any label in this list
+# combined with a non-null zone_id triggers ZONE_INTRUSION)
+zone_labels:
+  - "person"
+
+# Labels that directly map to PPE violations
+ppe_violation_labels:
+  - "no_hardhat"
+  - "no_vest"
+  - "no_helmet"
+  - "no_safety_vest"

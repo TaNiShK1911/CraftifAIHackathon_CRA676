@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+.env
+
+# Database and runtime data
+backend/data/
+data/
+
+# Snapshots and evidence uploads
+backend/data/evidence/
+backend/data/snapshots/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# PipeGen engines (large binary files)
+pipegen_export/*.engine
+pipegen_export/*.trt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

@@ -1,0 +1,39 @@
+# docker-compose.yml — SiteGuard local stack
+#
+# Starts:
+#   - mosquitto: Eclipse Mosquitto MQTT broker (CPU-only, handles PipeGen output)
+#
+# The backend (FastAPI) is run natively (not in Docker) to avoid container
+# networking surprises — see INTEGRATION.md section 5A.
+#
+# Usage:
+#   docker compose up -d mosquitto
+
+version: "3.9"
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: siteguard_mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"   # WebSocket port (optional, for browser MQTT clients)
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    restart: unless-stopped
+
+  # Optional: MediaMTX for HLS streaming of PipeGen's RTSP output
+  # Uncomment only if using option 2 from INTEGRATION.md section 4.4
+  # mediamtx:
+  #   image: bluenviron/mediamtx:latest
+  #   container_name: siteguard_mediamtx
+  #   ports:
+  #     - "8554:8554"   # RTSP
+  #     - "8888:8888"   # HLS
+  #   restart: unless-stopped
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:

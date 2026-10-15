@@ -1,0 +1,21 @@
+{
+  "camera_id": "cam0",
+  "frame_num": 42,
+  "timestamp": 1700000000000,
+  "objects": [
+    {
+      "tracker_id": 7,
+      "class": "person",
+      "conf": 0.92,
+      "bbox": [120, 200, 400, 680],
+      "roi": "hazard_zone_1"
+    },
+    {
+      "tracker_id": 3,
+      "class": "no_hardhat",
+      "conf": 0.87,
+      "bbox": [500, 100, 650, 300],
+      "roi": null
+    }
+  ]
+}
