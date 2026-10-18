@@ -7,7 +7,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,16 +19,27 @@ class Settings(BaseSettings):
     )
 
     # MQTT
-    mqtt_host: str = "localhost"
-    mqtt_port: int = 1883
-    mqtt_topic: str = "pipegen/detection/demo"
+    mqtt_host: str = Field(
+        default_factory=lambda: os.environ.get("SITEGUARD_MQTT_HOST", os.environ.get("MQTT_HOST", "localhost"))
+    )
+    mqtt_port: int = Field(
+        default_factory=lambda: int(os.environ.get("SITEGUARD_MQTT_PORT", os.environ.get("MQTT_PORT", "1883")))
+    )
+    mqtt_topic: str = Field(
+        default_factory=lambda: os.environ.get("SITEGUARD_MQTT_TOPIC", os.environ.get("MQTT_TOPIC", "pipegen/detection/demo"))
+    )
 
     # PipeGen output
     pipegen_output_dir: str = "/tmp/pipegen_out"
     media_video_path: str = "/tmp/pipegen_out/annotated.mp4"
 
     # Database
-    db_path: str = str(Path(__file__).resolve().parent.parent.parent / "data" / "siteguard.db")
+    db_path: str = Field(
+        default_factory=lambda: os.environ.get(
+            "SITEGUARD_DB_PATH",
+            os.environ.get("DB_PATH", str(Path(__file__).resolve().parent.parent.parent / "data" / "siteguard.db"))
+        )
+    )
 
     # CORS
     cors_origins: str = "http://localhost:5173"

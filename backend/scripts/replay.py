@@ -40,7 +40,10 @@ async def replay(file_path: Path, speed: float = 1.0) -> None:
         if not line:
             continue
         try:
-            obj = json.loads(line)
+            raw = line
+            if " " in line and (line.startswith("pipegen/") or not line.startswith("{")):
+                _, raw = line.split(" ", 1)
+            obj = json.loads(raw)
             if isinstance(obj, list):
                 records.extend(obj)
             elif isinstance(obj, dict):
