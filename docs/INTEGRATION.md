@@ -41,7 +41,7 @@ The PipeGen v0.5.1 lab guide is a private Google Doc, so its JSON metadata and M
 
 **SiteGuard** watches a worksite video. A PipeGen pipeline detects people, tracks them, and flags **hazard-zone intrusion** and **missing PPE** (hard hat, vest). PipeGen publishes the results over **MQTT** and writes **JSON metadata**. A backend turns the stream of per-frame detections into deduplicated, severity-ranked **incidents**, and a dashboard lets a safety officer see, acknowledge and resolve them live.
 
-**Bonus targeted:** *Edge Optimization (Track A)* — compile FP16 and INT8 engines, run INT8 live, and report the speed/accuracy trade-off from PipeGen's reports. Both are achievable on an x86 NVIDIA GPU; a Jetson is not required for this bonus ("run an INT8 engine **or** deploy on a Jetson").
+**Bonus targeted:** *None claimed.* Both models were compiled and profiled in FP32 (`yolo11s` @ 30.75 FPS, `best` PPE @ 66.2 FPS). INT8 calibration was not executed in this run, and FP16 was not run. The Edge Optimization bonus is not claimed unless an INT8 engine is compiled on-device.
 
 **Not targeted:** *Closed Loop* (needs a physical FirmGen board) and *Live Intelligence* (Track B).
 
@@ -92,19 +92,19 @@ Fill each of the five stages deliberately, and screenshot each for the submissio
 | **1. Requirement** | Plain-English prompt, e.g. *"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."* |
 | **2. Pipeline IR** | Review the node graph: source, decode, detector (+ tracker), zone/ROI analytics if offered, sink nodes (MQTT, JSON, video/RTSP). **Screenshot the graph** (mandatory evidence). |
 | **3. Model** | Use the catalog or **Deep Search** for a person + PPE (hard hat / vest) model. Prefer one model that outputs `person, hardhat, vest` or `no_hardhat`. If only a person model exists, use it for zone intrusion and add a second PPE model if PipeGen allows. |
-| **4. Compiler** | Compile ONNX to TensorRT **FP16**, then **INT8**. Keep the **speed report** for each (mandatory evidence + bonus). Record FPS, latency, power and accuracy. |
-| **5. Run** | Run the generated `run.sh` on the demo video with MQTT and JSON output enabled. Save the annotated output video. |
+| **4. Compiler** | Compile ONNX to TensorRT **FP32** plans for both models (`yolo11s.fp32.plan` and `best.fp32.plan`). Keep the speed report (`captured/speed_report.csv`). |
+| **5. Run** | Run the generated `run.sh` on the demo video (`demo.mp4`) with MQTT (`pipegen/detection/demo`) and JSON output enabled. Save the annotated output video. |
 
-**Demo footage:** use a clip you are allowed to use (your own, or a clearly licensed one) containing: a person entering a zone, a person without a hard hat, and a person with PPE walking normally (to show no false alarm). 60 to 120 seconds is enough.
+**Demo footage:** `demo.mp4` (2560x1440, 395 frames, 16s).
 
-**Zones:** define the hazard zone inside PipeGen. Copy the same polygon into `backend/config/zones.yaml` purely for display in the UI.
+**Zones:** defined hazard zone polygon `[[256, 432], [1280, 432], [1280, 1152], [256, 1152]]` inside PipeGen Pipeline IR.
 
 ## 4. Interface contracts
 
 ### 4.1 PipeGen to Backend
-- **MQTT:** broker `localhost:1883`, topic filter set in `MQTT_TOPIC` (default `pipegen/#`, **replace with the real topic**).
-- **JSON metadata:** folder `PIPEGEN_OUTPUT_DIR`, watched for new/appended files.
-- **Mapping:** `backend/config/adapter.yaml` (see backend plan section 6.3).
+- **MQTT:** broker `localhost:1883`, topic `pipegen/detection/demo`.
+- **JSON metadata:** folder `PIPEGEN_OUTPUT_DIR` (or `metadata.json`), watched for new/appended files.
+- **Mapping:** `backend/app/ingest/adapter.py`.
 
 ### 4.2 Backend to Frontend
 - REST under `/api/*` and SSE at `/api/stream`. Full list in the backend plan section 8.

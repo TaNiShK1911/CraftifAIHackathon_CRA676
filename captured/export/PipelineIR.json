@@ -8,8 +8,8 @@
       "parameters": {}
     },
     "visited_steps": [
-      "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src2/RestrictedAreaMonitoring/application.py",
-      "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src1/ppe-kit/application.py"
+      "src2/RestrictedAreaMonitoring/application.py",
+      "src1/ppe-kit/application.py"
     ]
   },
   "pipeline_ir": {
@@ -126,13 +126,13 @@
             }
           }
         ],
-        "pseudo_code": "def frames():\n    import cv2\n    cap = cv2.VideoCapture('/home/tanishk_ji/videos/demo.mp4')\n    if not cap.isOpened():\n        raise FileNotFoundError('/home/tanishk_ji/videos/demo.mp4')\n    reported_fps = cap.get(cv2.CAP_PROP_FPS)\n    fps = reported_fps if reported_fps > 0 else 25.0\n    index = 0\n    try:\n        while True:\n            ok, frame = cap.read()\n            if not ok:\n                break\n            position_ms = cap.get(cv2.CAP_PROP_POS_MSEC)\n            timestamp_s = position_ms / 1000.0 if position_ms > 0 else index / fps\n            height, width = frame.shape[:2]\n            metadata = {'frame_index': index, 'timestamp_s': timestamp_s, 'fps': fps, 'width': width, 'height': height}\n            yield frame, metadata\n            index += 1\n    finally:\n        cap.release()",
+        "pseudo_code": "def frames():\n    import cv2\n    cap = cv2.VideoCapture('videos/demo.mp4')\n    if not cap.isOpened():\n        raise FileNotFoundError('videos/demo.mp4')\n    reported_fps = cap.get(cv2.CAP_PROP_FPS)\n    fps = reported_fps if reported_fps > 0 else 25.0\n    index = 0\n    try:\n        while True:\n            ok, frame = cap.read()\n            if not ok:\n                break\n            position_ms = cap.get(cv2.CAP_PROP_POS_MSEC)\n            timestamp_s = position_ms / 1000.0 if position_ms > 0 else index / fps\n            height, width = frame.shape[:2]\n            metadata = {'frame_index': index, 'timestamp_s': timestamp_s, 'fps': fps, 'width': width, 'height': height}\n            yield frame, metadata\n            index += 1\n    finally:\n        cap.release()",
         "resolution": [
           2560,
           1440
         ],
         "type": "input",
-        "url": "file:///home/tanishk_ji/videos/demo.mp4"
+        "url": "file://videos/demo.mp4"
       },
       {
         "color_order": "RGB",
@@ -259,8 +259,8 @@
           ],
           "parameter_count": 9485791,
           "type": "engine",
-          "url": "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/model_stage/yolo11s.fp32.plan",
-          "source_onnx": "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src2/RestrictedAreaMonitoring/model/yolo11s.onnx"
+          "url": "models/yolo11s.fp32.plan",
+          "source_onnx": "models/yolo11s.onnx"
         },
         "ports": [
           {
@@ -305,7 +305,7 @@
             }
           }
         ],
-        "pseudo_code": "def process(blob, state={}):\n    import onnxruntime as ort\n    if 'session' not in state:\n        state['session'] = ort.InferenceSession('/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src2/RestrictedAreaMonitoring/model/yolo11s.onnx', providers=ort.get_available_providers())\n    session = state['session']\n    return session.run(['output0'], {'images': blob})[0]",
+        "pseudo_code": "def process(blob, state={}):\n    import onnxruntime as ort\n    if 'session' not in state:\n        state['session'] = ort.InferenceSession('models/yolo11s.onnx', providers=ort.get_available_providers())\n    session = state['session']\n    return session.run(['output0'], {'images': blob})[0]",
         "type": "inference"
       },
       {
@@ -498,8 +498,8 @@
           ],
           "parameter_count": 2727560,
           "type": "engine",
-          "url": "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/model_stage/6-best/best.fp32.plan",
-          "source_onnx": "/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src1/ppe-kit/model/best.onnx"
+          "url": "models/best.fp32.plan",
+          "source_onnx": "models/best.onnx"
         },
         "ports": [
           {
@@ -544,7 +544,7 @@
             }
           }
         ],
-        "pseudo_code": "def process(blob, state={}):\n    import onnxruntime as ort\n    if 'session' not in state:\n        state['session'] = ort.InferenceSession('/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/src1/ppe-kit/model/best.onnx', providers=ort.get_available_providers())\n    session = state['session']\n    return session.run(['output0'], {'images': blob})[0]",
+        "pseudo_code": "def process(blob, state={}):\n    import onnxruntime as ort\n    if 'session' not in state:\n        state['session'] = ort.InferenceSession('models/best.onnx', providers=ort.get_available_providers())\n    session = state['session']\n    return session.run(['output0'], {'images': blob})[0]",
         "type": "inference"
       },
       {
@@ -920,10 +920,10 @@
             }
           }
         ],
-        "pseudo_code": "def process(result, state={}):\n    import json\n    from pathlib import Path\n    path = Path('/home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/output/metadata.json')\n    state.setdefault('frames', []).append(result)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    temporary = path.with_name(path.name + '.tmp')\n    with temporary.open('w', encoding='utf-8') as stream:\n        json.dump({'source': '/home/tanishk_ji/videos/demo.mp4', 'ppe_limitation': 'The PPE model detects items, not person-level compliance; possible violations are unconfirmed.', 'frames': state['frames']}, stream)\n    temporary.replace(path)\n    return None",
+        "pseudo_code": "def process(result, state={}):\n    import json\n    from pathlib import Path\n    path = Path('output/metadata.json')\n    state.setdefault('frames', []).append(result)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    temporary = path.with_name(path.name + '.tmp')\n    with temporary.open('w', encoding='utf-8') as stream:\n        json.dump({'source': 'videos/demo.mp4', 'ppe_limitation': 'The PPE model detects items, not person-level compliance; possible violations are unconfirmed.', 'frames': state['frames']}, stream)\n    temporary.replace(path)\n    return None",
         "resolution": null,
         "type": "output",
-        "url": "file:///home/tanishk_ji/.pipegen/tanishkbhanage/65fb2507-da6e-4502-b2ed-4c8f644d736d/output/metadata.json"
+        "url": "file://output/metadata.json"
       }
     ]
   }
