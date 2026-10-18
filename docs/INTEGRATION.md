@@ -234,7 +234,7 @@ Mount it in `docker-compose.yml`: `./mosquitto/mosquitto.conf:/mosquitto/config/
 | No MQTT messages reach the backend | Wrong topic or host | `mosquitto_sub -h localhost -t '#' -v` to see what PipeGen actually publishes |
 | Backend cannot read the JSON folder | Permissions or wrong path | Check `PIPEGEN_OUTPUT_DIR`; run `ls` as the backend user |
 | Port already in use | Old process | `ss -ltnp | grep -E '1883|8000|5173'` |
-| INT8 calibration fails or accuracy collapses | Poor calibration data | Keep FP16 as primary; report INT8 as the measured trade-off |
+| INT8 calibration fails or accuracy collapses | Poor calibration data | Run FP32 baseline; report INT8 as not run |
 
 > The old blocker "No NVIDIA GPU / Linux available" is replaced by this section's Step 1. If any Step 1 check fails, fix it before anything else.
 
@@ -251,12 +251,13 @@ siteguard/
 ├── docker-compose.yml
 ├── docs/
 │   ├── evidence/
-│   │   ├── 01_requirement.png
-│   │   ├── 02_pipeline_ir_graph.png      # mandatory
+│   │   ├── 02_pipeline_ir_node_graph.png # mandatory
 │   │   ├── 03_model_selection.png
-│   │   ├── 04_tensorrt_speed_fp16.png    # mandatory
-│   │   ├── 05_tensorrt_speed_int8.png    # bonus
-│   │   └── 06_live_run.png
+│   │   ├── 04_speed_report_best_ppe_fp32.png # mandatory
+│   │   ├── 05_compile_both_engines.png
+│   │   ├── 06_live_run_completed.png
+│   │   ├── 07_live_terminal_run_completed.png
+│   │   └── 08_live_dashboard.png
 │   └── demo_video.mp4             # optional
 └── Makefile
 ```
@@ -266,11 +267,11 @@ siteguard/
 | Official requirement | Where satisfied | Evidence to attach |
 |---|---|---|
 | Full PipeGen flow (5 stages) | Section 3 | Stage screenshots |
-| TensorRT engine + speed report | Compiler stage FP16 + INT8 | Speed report screenshots; `/pipeline` page |
+| TensorRT engine + speed report | Compiler stage FP32 (INT8 not run) | Speed report screenshots; `/pipeline` page |
 | Live run on GPU machine | `run.sh` on demo video | Terminal + live window screenshot, annotated video |
 | Actionable output | MQTT + JSON consumed into incidents and dashboard | Dashboard recording; sample JSON |
 | Deep Integration | All perception is PipeGen; no inference code in repo | README split table (section 2) |
-| Edge Optimization bonus | INT8 engine run + trade-off table | `/pipeline` bar chart + reports |
+| Edge Optimization bonus | Not claimed (INT8 not run) | Explicit "INT8 not run" disclosure on `/pipeline` |
 | Source code incl. PipeGen export folder | Section 6 | Repo link |
 | Project description (inputs, tasks, models, precision, outputs) | README + `/pipeline` summary | Same text pasted in the form |
 
@@ -279,9 +280,9 @@ siteguard/
 | Time | PipeGen (critical path) | Backend | Frontend |
 |---|---|---|---|
 | 0:00–0:20 | Section 5A Step 1 to 2: verify CUDA, X11, Docker GPU; install PipeGen; `pipegen --version` | | |
-| 0:20–1:30 | Requirement to IR to Model to Compile FP16 | B1–B2 scaffold, broker | F1–F2 scaffold, list |
+| 0:20–1:30 | Requirement to IR to Model to Compile FP32 | B1–B2 scaffold, broker | F1–F2 scaffold, list |
 | 1:30–2:15 | First **Run**; **capture real MQTT/JSON sample** | B3 adapter from real sample | F3 live feed (dev replay allowed) |
-| 2:15–3:15 | Compile INT8, record speed reports | B4–B6 rules, API, SSE | F4–F5 video, charts, drawer |
+| 2:15–3:15 | Compile FP32 engines, record speed reports (INT8 not run) | B4–B6 rules, API, SSE | F4–F5 video, charts, drawer |
 | 3:15–4:00 | Final recorded run on the demo clip | B7 pipeline/evidence | F6 evidence page |
 | 4:00–4:30 | End-to-end rehearsal; tune thresholds | B8 README | F7 polish |
 | 4:30–5:00 | Screenshots, push repo, **submit form** | Buffer | Buffer |
@@ -297,15 +298,15 @@ siteguard/
 - [ ] The compliant person produces **no** incident
 - [ ] Incident auto-closes after the person leaves
 - [ ] Browser refresh and backend restart both recover cleanly
-- [ ] `/pipeline` shows real FP16 and INT8 numbers
+- [ ] `/pipeline` shows real FP32 numbers and explicit "INT8 not run" notice
 - [ ] A fresh clone starts with `make demo` following only the README
 
 ## 10. Demo script (3 minutes)
 
 1. **Problem (20s):** incidents go unnoticed until someone is hurt.
-2. **PipeGen (60s):** show the Requirement text, the **Pipeline IR graph**, the TensorRT **speed report**, and say what was compiled (FP16, INT8).
+2. **PipeGen (60s):** show the Requirement text, the **Pipeline IR graph**, the TensorRT **speed report**, and say what was compiled (FP32; INT8 not run).
 3. **Live (60s):** run the pipeline on the clip; the dashboard raises an intrusion and a PPE violation in real time; acknowledge one.
-4. **Edge optimization (20s):** `/pipeline` chart: INT8 vs FP16 speed and accuracy delta.
+4. **Edge optimization (20s):** `/pipeline` notice: INT8 was not run (honest disclosure).
 5. **Close (20s):** "Every detection you saw was produced by PipeGen; the dashboard turns it into action."
 
 ## 11. Risks and mitigations
@@ -315,7 +316,7 @@ siteguard/
 | Local CUDA stack misconfigured (driver / X11 / versions) | Medium | Run the Step 1 checks in section 5A first; fix before building anything |
 | PipeGen output schema differs from assumptions | High | Adapter + YAML; capture real sample early |
 | No PPE model in the catalog | Medium | Use **Deep Search**; fall back to zone intrusion as the primary incident type |
-| INT8 accuracy drop or calibration failure | Medium | Keep FP16 as the primary; report INT8 honestly as the trade-off |
+| INT8 calibration failure | Medium | Keep FP32 as primary; report INT8 honestly as not run |
 | Browser cannot play the stream | Medium | Use saved annotated `.mp4` (section 4.4 option 1) |
 | Deadline ambiguity / remote presentation | High | Confirm on Discord now; submit early |
 | Judged as "bolted on" | Medium | README split table, pipeline IR in the UI, no inference code in repo |

@@ -111,7 +111,7 @@ function PipelinePage() {
             </EmptyState>
           )}
         </Section>
-        <Section title="Edge optimization (INT8)">
+        <Section title="Edge optimization (INT8 not run)">
           <div className="flex h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border p-6 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-sev-medium/40 bg-sev-medium/10 px-3 py-1 font-mono text-xs font-semibold text-sev-medium">
               <span className="size-2 rounded-full bg-sev-medium" />

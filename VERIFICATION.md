@@ -61,7 +61,7 @@ Executed on host machine:
 - **CUDA Version:** 13.1 (Driver) / 12.6 (Runtime)
 - **TensorRT Version:** 10.3.0
 - **PipeGen Container:** `craftifaidocker/deepstream:7.1-amd64-v3`
-- **Footage:** [`demo.mp4`](file:///home/tanishk_ji/videos/demo.mp4) (2560x1440, 16s, 395 frames)
+- **Footage:** [`demo.mp4`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/export/pipeline/pipeline.sh) (2560x1440, 16s, 395 frames)
 
 ### Ground-Truth TensorRT Benchmark Results (FP32)
 
@@ -81,23 +81,23 @@ Executed on host machine:
 
 ## 4. Evidence Artifacts Directory
 
-All captured artifacts are preserved in `captured/` and indexed in [`docs/evidence/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/):
+All captured artifacts are preserved in `captured/` and indexed in [`docs/evidence/`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/):
 
 | Artifact | Location | Description | Status |
 |---|---|---|---|
-| Pipeline IR Interactive Node Graph | [`docs/evidence/02_pipeline_ir_node_graph.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph.png) | Interactive Node Graph in PipeGen showing full DAG with parallel YOLO11s person and YOLOv8n PPE branches, tracking, hazard polygon, and MQTT/JSON outputs | **Verified** |
-| Pipeline IR Graph (Upper Zoom) | [`docs/evidence/02_pipeline_ir_node_graph_upper.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph_upper.png) | High-resolution zoom of Input, Preprocess, Inference, and Postprocess stages | **Verified** |
-| Pipeline IR Graph (Lower Zoom) | [`docs/evidence/02_pipeline_ir_node_graph_lower.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph_lower.png) | High-resolution zoom of Hungarian person tracking, hazard zone alert, PPE violation alert, and MQTT/JSON outputs | **Verified** |
-| Model Selection Stage | [`docs/evidence/03_model_selection.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/03_model_selection.png) | PipeGen Model stage matching `yolo11s.onnx` and `best.onnx` from catalog | **Verified** |
-| TensorRT Speed Report (PPE FP32) | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_speed_report_best_ppe_fp32.png) | Real TensorRT FP32 compilation and layer speed breakdown for `best.onnx` on RTX 3050 Laptop GPU (15.11 ms latency, 66.2 FPS, 32.87 W) | **Verified** |
-| Pipeline Compilation Stage | [`docs/evidence/05_compile_both_engines.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_compile_both_engines.png) | Both FP32 engines bound (`node 3 -> yolo11s.fp32.plan`, `node 6 -> best.fp32.plan`) with "Pipeline compiled successfully" | **Verified** |
-| Live Run Completion | [`docs/evidence/06_live_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/06_live_run_completed.png) | "Pipeline run completed" with export trigger button | **Verified** |
-| Live Terminal Hardware Execution | [`docs/evidence/07_live_terminal_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/07_live_terminal_run_completed.png) | Terminal execution of `./run.sh` processing all 395 frames, 2,801 objects, and 395 MQTT messages (17.3 msg/s, 19.2s) | **Verified** |
-| Live Dashboard & Video Feed | [`docs/evidence/08_live_dashboard.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/08_live_dashboard.png) | Real-time SiteGuard operator dashboard (`/live`) showing streaming video, `[LIVE · SSE]`, `[BROKER ✓]`, `LIVE: 38` badge, and live KPI feed | **Verified** |
-| Pipeline Export Directory | [`captured/export/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/export/) & [`pipegen_export/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/pipegen_export/) | Complete 26-file self-contained export bundle (`run.sh`, `manifest.json`, `PipelineIR.json`, `models/`, `pipeline/`) | **Verified** |
-| MQTT Capture Sample | [`captured/mqtt_sample.txt`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/mqtt_sample.txt) | 395 wire-format frame messages published on `pipegen/detection/demo` | **Verified** |
-| JSON Metadata Output | [`captured/json_sample/metadata.json`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/json_sample/metadata.json) | 872 KB per-frame detection, tracking, hazard zone, and PPE metadata | **Verified** |
-| Benchmarks CSV | [`captured/speed_report.csv`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/speed_report.csv) | Machine-readable profiling output imported into DB as `data_origin="live"` | **Verified** |
+| Pipeline IR Interactive Node Graph | [`docs/evidence/02_pipeline_ir_node_graph.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/02_pipeline_ir_node_graph.png) | Interactive Node Graph in PipeGen showing full DAG with parallel YOLO11s person and YOLOv8n PPE branches, tracking, hazard polygon, and MQTT/JSON outputs | **Verified** |
+| Pipeline IR Graph (Upper Zoom) | [`docs/evidence/02_pipeline_ir_node_graph_upper.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/02_pipeline_ir_node_graph_upper.png) | High-resolution zoom of Input, Preprocess, Inference, and Postprocess stages | **Verified** |
+| Pipeline IR Graph (Lower Zoom) | [`docs/evidence/02_pipeline_ir_node_graph_lower.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/02_pipeline_ir_node_graph_lower.png) | High-resolution zoom of Hungarian person tracking, hazard zone alert, PPE violation alert, and MQTT/JSON outputs | **Verified** |
+| Model Selection Stage | [`docs/evidence/03_model_selection.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/03_model_selection.png) | PipeGen Model stage matching `yolo11s.onnx` and `best.onnx` from catalog | **Verified** |
+| TensorRT Speed Report (PPE FP32) | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/04_speed_report_best_ppe_fp32.png) | Real TensorRT FP32 compilation and layer speed breakdown for `best.onnx` on RTX 3050 Laptop GPU (15.11 ms latency, 66.2 FPS, 32.87 W) | **Verified** |
+| Pipeline Compilation Stage | [`docs/evidence/05_compile_both_engines.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/05_compile_both_engines.png) | Both FP32 engines bound (`node 3 -> yolo11s.fp32.plan`, `node 6 -> best.fp32.plan`) with "Pipeline compiled successfully" | **Verified** |
+| Live Run Completion | [`docs/evidence/06_live_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/06_live_run_completed.png) | "Pipeline run completed" with export trigger button | **Verified** |
+| Live Terminal Hardware Execution | [`docs/evidence/07_live_terminal_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/07_live_terminal_run_completed.png) | Terminal execution of `./run.sh` processing all 395 frames, 2,801 objects, and 395 MQTT messages (17.3 msg/s, 19.2s) | **Verified** |
+| Live Dashboard & Video Feed | [`docs/evidence/08_live_dashboard.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/08_live_dashboard.png) | Real-time SiteGuard operator dashboard (`/live`) showing streaming video, `[LIVE · SSE]`, `[BROKER ✓]`, `LIVE: 38` badge, and live KPI feed | **Verified** |
+| Pipeline Export Directory | [`captured/export/`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/export/) & [`pipegen_export/`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/pipegen_export/) | Complete 26-file self-contained export bundle (`run.sh`, `manifest.json`, `PipelineIR.json`, `models/`, `pipeline/`) | **Verified** |
+| MQTT Capture Sample | [`captured/mqtt_sample.txt`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/mqtt_sample.txt) | 395 wire-format frame messages published on `pipegen/detection/demo` | **Verified** |
+| JSON Metadata Output | [`captured/json_sample/metadata.json`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/json_sample/metadata.json) | 872 KB per-frame detection, tracking, hazard zone, and PPE metadata | **Verified** |
+| Benchmarks CSV | [`captured/speed_report.csv`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/speed_report.csv) | Machine-readable profiling output imported into DB as `data_origin="live"` | **Verified** |
 
 ### Honestly Noted Missing Evidence
 1. **YOLO11s individual GUI speed card screenshot:** While `yolo11s` was compiled and profiled on-device (metrics verified in `speed_report.csv`), a screenshot of its individual layer-breakdown GUI card was not captured before stage transition.

@@ -4,9 +4,9 @@
 
 SiteGuard is a real-time safety monitor for construction sites and factories. A **CraftifAI PipeGen** pipeline running on a local **NVIDIA GPU (CUDA + TensorRT + DeepStream)** detects and tracks people, flags **hazard-zone intrusions** and **missing PPE**, and publishes results over **MQTT and JSON**. A lightweight backend and dashboard turn those detections into clean, deduplicated, severity-ranked incidents that a safety officer can acknowledge and resolve.
 
-Built for the **[Embedded SF: CraftifAI Physical AI Hackathon](https://luma.com/5z8w42mq)** (HackwithBangalore 4.0) — **Track A: PipeGen**, with the **Edge Optimization** bonus.
+Built for the **[Embedded SF: CraftifAI Physical AI Hackathon](https://luma.com/5z8w42mq)** (HackwithBangalore 4.0) — **Track A: PipeGen**.
 
-> **Track:** Track A — PipeGen (Perception) · **Bonus:** Edge Optimization (INT8) · **Repository:** [SiteGuard](https://github.com/TaNiShK1911/SiteGuard)
+> **Track:** Track A — PipeGen (Perception) · **Bonus:** none claimed (INT8 not run) · **Repository:** [SiteGuard](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676)
 
 ---
 
@@ -26,7 +26,7 @@ Workers enter hazard zones or skip hard hats and vests, and nobody notices until
 | Concern | Done by |
 |---|---|
 | Object detection, tracking, zone/PPE analytics | **PipeGen** (generated DeepStream app) |
-| ONNX to TensorRT compilation (FP16 / INT8), speed and accuracy reports | **PipeGen** |
+| ONNX to TensorRT compilation (FP32 run; INT8 not run), speed and accuracy reports | **PipeGen** |
 | Emitting MQTT, JSON and annotated video | **PipeGen** |
 | Dedupe, debounce, severity, incident lifecycle, storage | Backend |
 | Visualisation and acknowledgement workflow | Frontend |
@@ -60,11 +60,11 @@ flowchart LR
 
 | Stage | What we did | Evidence |
 |---|---|---|
-| 1. Requirement | Defined safety requirement with hazard zone polygon vertices `[[256, 432], [1280, 432], [1280, 1152], [256, 1152]]` on `demo.mp4` | [`captured/export/PipelineIR.json`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/export/PipelineIR.json) |
-| 2. Pipeline IR | PipeGen-generated interactive DAG (Input &rarr; Preprocess &rarr; Inference &rarr; Postprocess &rarr; Tracking &rarr; Hazard Zone &rarr; PPE Alert &rarr; MQTT/JSON) | [`docs/evidence/02_pipeline_ir_node_graph.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph.png) |
-| 3. Model | Deep Search model selection matching `yolo11s.onnx` (RestrictedAreaMonitoring) and `best.onnx` (ppe-kit) | [`docs/evidence/03_model_selection.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/03_model_selection.png) |
-| 4. Compiler | Compiled TensorRT FP32 engines (`yolo11s.fp32.plan`, `best.fp32.plan`) with layer-by-layer profiling on RTX 3050 | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_speed_report_best_ppe_fp32.png), [`docs/evidence/05_compile_both_engines.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_compile_both_engines.png) |
-| 5. Run & Dashboard | DeepStream execution processing 395 frames on RTX 3050, publishing live telemetry to Mosquitto MQTT & writing JSON metadata, displayed on SiteGuard live control room | [`docs/evidence/06_live_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/06_live_run_completed.png), [`docs/evidence/07_live_terminal_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/07_live_terminal_run_completed.png), [`docs/evidence/08_live_dashboard.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/08_live_dashboard.png) |
+| 1. Requirement | Defined safety requirement with hazard zone polygon vertices `[[256, 432], [1280, 432], [1280, 1152], [256, 1152]]` on `demo.mp4` | [`captured/export/PipelineIR.json`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/export/PipelineIR.json) |
+| 2. Pipeline IR | PipeGen-generated interactive DAG (Input &rarr; Preprocess &rarr; Inference &rarr; Postprocess &rarr; Tracking &rarr; Hazard Zone &rarr; PPE Alert &rarr; MQTT/JSON) | [`docs/evidence/02_pipeline_ir_node_graph.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/02_pipeline_ir_node_graph.png) |
+| 3. Model | Deep Search model selection matching `yolo11s.onnx` (RestrictedAreaMonitoring) and `best.onnx` (ppe-kit) | [`docs/evidence/03_model_selection.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/03_model_selection.png) |
+| 4. Compiler | Compiled TensorRT FP32 engines (`yolo11s.fp32.plan`, `best.fp32.plan`) with layer-by-layer profiling on RTX 3050 | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/04_speed_report_best_ppe_fp32.png), [`docs/evidence/05_compile_both_engines.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/05_compile_both_engines.png) |
+| 5. Run & Dashboard | DeepStream execution processing 395 frames on RTX 3050, publishing live telemetry to Mosquitto MQTT & writing JSON metadata, displayed on SiteGuard live control room | [`docs/evidence/06_live_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/06_live_run_completed.png), [`docs/evidence/07_live_terminal_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/07_live_terminal_run_completed.png), [`docs/evidence/08_live_dashboard.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/08_live_dashboard.png) |
 
 **Inputs:** `demo.mp4` (2560x1440, 16s, 395 frames) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification (hard hat & vest) · **Models:** `yolo11s` (person detector), `best` (six-class PPE detector) · **Precision:** FP32 for both models (INT8 not run) · **Outputs:** Mosquitto MQTT (`pipegen/detection/demo`), JSON metadata (`metadata.json`)
 
@@ -238,7 +238,7 @@ Evidence screenshots and reports are stored in `docs/evidence/` and `captured/`.
 - [x] **Live run on a local NVIDIA GPU** — executed 395 frames on NVIDIA GeForce RTX 3050 Laptop GPU
 - [x] **Actionable output** (MQTT/JSON consumed into incidents and a dashboard) — live adapter calibrated and verified
 - [x] **PipeGen is load-bearing** (all perception is PipeGen-generated) — 0 lines of model inference code in repo
-- [ ] **Bonus: Edge Optimization** (INT8 vs FP16 trade-off) — INT8 not run (FP32 deployed as primary baseline)
+- [ ] **Bonus: Edge Optimization** — INT8 not run (FP16 not run; FP32 deployed as primary baseline)
 
 > Verified and audited in `VERIFICATION.md`. Every benchmark is backed by actual execution artifacts.
 

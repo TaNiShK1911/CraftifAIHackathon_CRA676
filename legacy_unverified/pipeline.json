@@ -10,7 +10,7 @@
       "type": "source",
       "plugin": "nvurisrcbin",
       "properties": {
-        "uri": "file:///home/akhilesh/videos/demo.mp4",
+        "uri": "/home/akhilesh/videos/demo.mp4",
         "drop-frame-interval": 0
       }
     },
