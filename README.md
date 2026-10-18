@@ -60,23 +60,29 @@ flowchart LR
 
 | Stage | What we did | Evidence |
 |---|---|---|
-| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | [`pipegen_export/pipeline.json`](pipegen_export/pipeline.json) |
-| 2. Pipeline IR | `nvurisrcbin (demo.mp4) -> nvstreammux -> nvinfer (yolov8n-ppe) -> nvtracker -> nvdsanalytics (zones) -> nvmsgbroker (MQTT) + nvmsgconv (JSON)` | [`docs/evidence/pipegen_ir_graph.svg`](docs/evidence/pipegen_ir_graph.svg) · [`03_pipeline_and_evidence.png`](docs/evidence/03_pipeline_and_evidence.png) |
-| 3. Model | `yolov8n-person-ppe` detecting person, hardhat, vest | [`docs/evidence/03_pipeline_and_evidence.png`](docs/evidence/03_pipeline_and_evidence.png) |
-| 4. Compiler | TensorRT FP16 (94.6 FPS) and INT8 (156.3 FPS) compiled engines | [`docs/evidence/tensorrt_speed_report.svg`](docs/evidence/tensorrt_speed_report.svg) · [`04_tensorrt_benchmarks.png`](docs/evidence/04_tensorrt_benchmarks.png) |
-| 5. Run & Dashboard | Real-time edge monitor on `demo.mp4`, ingesting MQTT & JSON telemetry | [`docs/evidence/01_live_dashboard.png`](docs/evidence/01_live_dashboard.png) · [`02_incidents_management.png`](docs/evidence/02_incidents_management.png) |
+| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | Not yet verified |
+| 2. Pipeline IR | PipeGen-generated DeepStream node graph | Not yet verified — awaiting real PipeGen export in `captured/` |
+| 3. Model | Model selected via PipeGen catalog/Deep Search | Not yet verified |
+| 4. Compiler | TensorRT FP16 and INT8 compiled engines | Not yet verified — awaiting speed report from `captured/speed_report.*` |
+| 5. Run & Dashboard | Real-time edge monitor, ingesting MQTT & JSON telemetry | Not yet verified |
 
-**Inputs:** `demo.mp4` (video file) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification · **Precision:** FP16 (primary), INT8 (Edge Optimization bonus) · **Outputs:** Mosquitto MQTT (`pipegen/detections`), JSON metadata, annotated video feed
+**Inputs:** `demo.mp4` (video file) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification · **Precision:** FP16 (primary), INT8 (Edge Optimization bonus) · **Outputs:** Mosquitto MQTT, JSON metadata, annotated video feed
 
 ### Edge Optimization bonus: results
 
-Measured on **NVIDIA GeForce RTX 3050 Laptop GPU** (CUDA 12.8, TensorRT 10.x):
+> Benchmark numbers will be filled from `captured/speed_report.*` once a real PipeGen run is completed. See `backend/scripts/import_speed_report.py`.
 
-| Precision | FPS | Latency (ms) | Power (W) | Accuracy (mAP) |
-|---|---|---|---|---|
-| FP32 | 48.2 | 20.7 | 58.4 | 0.742 |
-| FP16 | 94.6 | 10.5 | 52.1 | 0.738 |
-| INT8 | 156.3 | 6.3 | 44.8 | 0.724 |
+## Data provenance
+
+Every row in the database and API carries a `data_origin` field:
+
+| Value | Meaning |
+|---|---|
+| `live` | Produced by a running PipeGen pipeline via MQTT or JSON tailer |
+| `replay` | Re-published from a captured file via `scripts/replay.py` (development only) |
+| `seed` | Synthetic demo data inserted by `scripts/seed_demo.py --allow-synthetic` |
+
+The dashboard defaults to **live only** view. Seeded and replayed rows are clearly badged in the UI.
 
 ## Incident logic
 
@@ -174,13 +180,15 @@ watch -n1 nvidia-smi
 ```
 siteguard/
 ├── pipegen_export/        # PipeGen export: pipeline, engines config, run.sh
+├── captured/              # Real PipeGen captures (MQTT samples, JSON, screenshots)
 ├── backend/               # FastAPI: ingest, rules engine, REST + SSE, SQLite
 │   ├── app/
 │   ├── config/            # adapter.yaml, zones.yaml
 │   └── tests/
-├── frontend/              # React + TypeScript + Tailwind dashboard
+├── frontend/              # React + TypeScript + TanStack Start + Tailwind dashboard
 ├── mosquitto/             # local broker config
 ├── docs/evidence/         # PipeGen screenshots and speed reports
+├── legacy_unverified/     # Quarantined fabricated assets (kept in git history)
 ├── docker-compose.yml
 ├── Makefile
 └── README.md
@@ -190,20 +198,21 @@ siteguard/
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/health` | Broker status, last message age |
-| GET | `/api/incidents` | List incidents (filter by status/type) |
+| GET | `/api/health` | Broker status, last message age, counts by data_origin |
+| GET | `/api/incidents` | List incidents (filter by status/type/data_origin) |
 | PATCH | `/api/incidents/{id}` | Acknowledge or resolve |
 | GET | `/api/stats/summary` | KPIs |
 | GET | `/api/stream` | Live updates (Server-Sent Events) |
-| GET | `/api/pipeline/runs` | FP32/FP16/INT8 comparison |
+| GET | `/api/pipeline/runs` | Imported speed report rows |
 
 ## Testing
 
 ```bash
 cd backend && pytest
+cd frontend && npm run test
 ```
 
-Backend tests use a real captured PipeGen sample (`backend/tests/fixtures/`). A development-only replay script (`backend/scripts/replay.py`) can re-publish captured output when no GPU is available. **Replay is never used for the demo or evidence.**
+Backend tests use a fixture in `backend/tests/fixtures/`. A development-only replay script (`backend/scripts/replay.py`) can re-publish captured output when no GPU is available; replayed data is labelled `data_origin=replay` in the database and UI.
 
 ## Troubleshooting
 
@@ -217,14 +226,14 @@ Backend tests use a real captured PipeGen sample (`backend/tests/fixtures/`). A 
 
 ## Hackathon requirements checklist
 
-- [x] Full PipeGen flow (Requirement, Pipeline IR, Model, Compiler, Run)
-- [x] TensorRT engine with PipeGen speed report
-- [x] Live run on a local NVIDIA GPU
-- [x] Actionable output (MQTT/JSON consumed into incidents and a dashboard)
-- [x] PipeGen is load-bearing (all perception is PipeGen-generated)
-- [x] Bonus: Edge Optimization (INT8 vs FP16 trade-off)
+- [ ] Full PipeGen flow (Requirement, Pipeline IR, Model, Compiler, Run) — awaiting real export in `captured/export/`
+- [ ] TensorRT engine with PipeGen speed report — awaiting `captured/speed_report.*`
+- [ ] Live run on a local NVIDIA GPU — not yet run
+- [ ] Actionable output (MQTT/JSON consumed into incidents and a dashboard) — code ready, awaiting live test
+- [ ] PipeGen is load-bearing (all perception is PipeGen-generated) — no inference code in repo ✓
+- [ ] Bonus: Edge Optimization (INT8 vs FP16 trade-off) — awaiting speed report
 
-> Tick these only after you have the evidence in `docs/evidence/`.
+> Tick these only after you have the evidence in `docs/evidence/` and `captured/`.
 
 ## Roadmap
 
