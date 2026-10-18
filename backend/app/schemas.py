@@ -51,6 +51,7 @@ class CanonicalEvent(BaseModel):
     zone_id: str | None = None              # set if PipeGen ROI/zone analytics reports it
     attributes: dict[str, Any] = Field(default_factory=dict)
     raw: dict[str, Any] = Field(default_factory=dict)
+    data_origin: str = "live"               # live | replay | seed
 
 
 # ---------------------------------------------------------------------------
@@ -72,6 +73,7 @@ class IncidentRead(BaseModel):
     snapshot_path: str | None
     ack_by: str | None
     ack_at: datetime | None
+    data_origin: str = "live"
 
     model_config = {"from_attributes": True}
 
@@ -95,6 +97,7 @@ class EventRead(BaseModel):
     confidence: float
     bbox_json: str | None
     zone_id: str | None
+    data_origin: str = "live"
 
     model_config = {"from_attributes": True}
 
@@ -112,6 +115,7 @@ class PipelineRunCreate(BaseModel):
     power_w: float | None = None
     accuracy_map: float | None = None
     notes: str | None = None
+    data_origin: str = "live"
 
 
 class PipelineRunRead(PipelineRunCreate):

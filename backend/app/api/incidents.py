@@ -21,6 +21,7 @@ router = APIRouter()
 def list_incidents(
     status: Optional[str] = Query(default=None),
     type: Optional[str] = Query(default=None),
+    data_origin: Optional[str] = Query(default=None, description="Filter by data_origin: live, replay, seed"),
     limit: int = Query(default=50, le=200),
     session: Session = Depends(get_session),
 ) -> list[IncidentRow]:
@@ -29,6 +30,8 @@ def list_incidents(
         stmt = stmt.where(IncidentRow.status == status.upper())
     if type:
         stmt = stmt.where(IncidentRow.type == type.upper())
+    if data_origin:
+        stmt = stmt.where(IncidentRow.data_origin == data_origin.lower())
     stmt = stmt.order_by(IncidentRow.last_seen.desc()).limit(limit)  # type: ignore[arg-type]
     return list(session.exec(stmt).all())
 

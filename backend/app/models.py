@@ -23,6 +23,7 @@ class EventRow(SQLModel, table=True):
     bbox_json: Optional[str] = None       # JSON string "[x, y, w, h]" normalised
     zone_id: Optional[str] = None
     raw_json: Optional[str] = None        # original payload for audit/debug
+    data_origin: str = Field(default="live", index=True)  # live | replay | seed
 
 
 class IncidentRow(SQLModel, table=True):
@@ -42,6 +43,7 @@ class IncidentRow(SQLModel, table=True):
     snapshot_path: Optional[str] = None
     ack_by: Optional[str] = None
     ack_at: Optional[datetime] = None
+    data_origin: str = Field(default="live", index=True)  # live | replay | seed
 
 
 class PipelineRunRow(SQLModel, table=True):
@@ -57,6 +59,7 @@ class PipelineRunRow(SQLModel, table=True):
     power_w: Optional[float] = None
     accuracy_map: Optional[float] = None
     notes: Optional[str] = None
+    data_origin: str = Field(default="live", index=True)  # live | replay | seed
 
 
 class EvidenceRow(SQLModel, table=True):

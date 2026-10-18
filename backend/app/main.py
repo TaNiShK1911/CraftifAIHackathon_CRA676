@@ -33,11 +33,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def _ingest_payload(payload: dict) -> None:
+async def _ingest_payload(payload: dict, *, data_origin: str = "live") -> None:
     """Shared callback: raw PipeGen payload → CanonicalEvent → rules engine."""
     canonical_events = adapter.normalize(payload)
     for event in canonical_events:
+        event.data_origin = data_origin
         await rules_engine.handle(event)
+
+
+async def _ingest_live(payload: dict) -> None:
+    """MQTT and JSON tailer callback.
+    Detects _data_origin injected by replay.py; defaults to 'live'.
+    """
+    origin = payload.pop("_data_origin", "live")
+    await _ingest_payload(payload, data_origin=origin)
 
 
 @asynccontextmanager
@@ -49,10 +58,10 @@ async def lifespan(app: FastAPI):
     tasks = []
 
     # MQTT consumer
-    tasks.append(asyncio.create_task(mqtt_consumer.run(_ingest_payload), name="mqtt_consumer"))
+    tasks.append(asyncio.create_task(mqtt_consumer.run(_ingest_live), name="mqtt_consumer"))
 
     # JSON tailer
-    tasks.append(asyncio.create_task(json_tailer.run(_ingest_payload), name="json_tailer"))
+    tasks.append(asyncio.create_task(json_tailer.run(_ingest_live), name="json_tailer"))
 
     # Auto-close background task
     tasks.append(asyncio.create_task(rules_engine.auto_close_loop(), name="auto_close"))
@@ -125,7 +134,6 @@ async def serve_video():
         _data_dir / "annotated.mp4",
         Path("demo.mp4"),
         Path("../demo.mp4"),
-        Path("d:/btech/projects/hackwithblr-trial/demo.mp4"),
     ]
     for video in candidates:
         if video.is_file():

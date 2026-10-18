@@ -1,7 +1,18 @@
 """
-Seed demo data into SQLite so the dashboard shows real pipeline runs, benchmarks, and incidents.
+Seed demo data into SQLite so the dashboard has something to display
+during development. All rows are marked data_origin='seed'.
+
+Usage:
+    python scripts/seed_demo.py --allow-synthetic
+
+Without --allow-synthetic the script refuses to run, to prevent
+accidental insertion of synthetic data into a live demo database.
+
+This script DOES NOT insert pipeline benchmark runs. Benchmark data
+must come from a real PipeGen speed report via import_speed_report.py.
 """
 from datetime import datetime, timezone, timedelta
+import argparse
 import sys
 from pathlib import Path
 
@@ -10,55 +21,32 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlmodel import Session, select
 from app.db import init_db, get_engine
-from app.models import PipelineRunRow, IncidentRow, EventRow, EvidenceRow
+from app.models import IncidentRow, EventRow
+
 
 def seed():
+    parser = argparse.ArgumentParser(
+        description="Seed synthetic demo incidents into the database (marked as seed)."
+    )
+    parser.add_argument(
+        "--allow-synthetic",
+        action="store_true",
+        required=True,
+        help="Required flag to confirm you want to insert synthetic data.",
+    )
+    args = parser.parse_args()
+
     init_db()
     engine = get_engine()
     with Session(engine) as session:
-        # Check if pipeline runs already exist
-        existing_runs = session.exec(select(PipelineRunRow)).all()
-        if not existing_runs:
-            print("Seeding pipeline benchmark runs (FP32, FP16, INT8)...")
-            runs = [
-                PipelineRunRow(
-                    model_name="yolov8n-person-ppe",
-                    precision="FP32",
-                    engine_path="models/yolov8n_ppe_fp32.engine",
-                    fps=48.2,
-                    latency_ms=20.7,
-                    power_w=58.4,
-                    accuracy_map=0.742,
-                    notes="Baseline FP32 ONNX execution on NVIDIA RTX 3050"
-                ),
-                PipelineRunRow(
-                    model_name="yolov8n-person-ppe",
-                    precision="FP16",
-                    engine_path="models/yolov8n_ppe_fp16.engine",
-                    fps=94.6,
-                    latency_ms=10.5,
-                    power_w=52.1,
-                    accuracy_map=0.738,
-                    notes="TensorRT FP16 compiled engine (Primary demo track)"
-                ),
-                PipelineRunRow(
-                    model_name="yolov8n-person-ppe",
-                    precision="INT8",
-                    engine_path="models/yolov8n_ppe_int8.engine",
-                    fps=156.3,
-                    latency_ms=6.3,
-                    power_w=44.8,
-                    accuracy_map=0.724,
-                    notes="Quantized INT8 engine with entropy calibration (Edge Optimization Bonus)"
-                ),
-            ]
-            for r in runs:
-                session.add(r)
-
         # Check incidents
-        existing_inc = session.exec(select(IncidentRow)).all()
-        if not existing_inc:
-            print("Seeding demo incidents...")
+        existing_inc = session.exec(
+            select(IncidentRow).where(IncidentRow.data_origin == "seed")
+        ).all()
+        if existing_inc:
+            print(f"Already have {len(existing_inc)} seeded incidents — skipping.")
+        else:
+            print("Seeding demo incidents (data_origin='seed')...")
             now = datetime.now(timezone.utc)
             incidents = [
                 IncidentRow(
@@ -72,6 +60,7 @@ def seed():
                     last_seen=now - timedelta(seconds=15),
                     event_count=42,
                     max_confidence=0.94,
+                    data_origin="seed",
                 ),
                 IncidentRow(
                     type="PPE_VIOLATION",
@@ -84,6 +73,7 @@ def seed():
                     last_seen=now - timedelta(minutes=2),
                     event_count=18,
                     max_confidence=0.88,
+                    data_origin="seed",
                 ),
                 IncidentRow(
                     type="LOITERING",
@@ -96,6 +86,7 @@ def seed():
                     last_seen=now - timedelta(seconds=10),
                     event_count=85,
                     max_confidence=0.96,
+                    data_origin="seed",
                 ),
                 IncidentRow(
                     type="PPE_VIOLATION",
@@ -110,34 +101,15 @@ def seed():
                     max_confidence=0.82,
                     ack_by="Site Operator",
                     ack_at=now - timedelta(hours=1, minutes=50),
-                )
+                    data_origin="seed",
+                ),
             ]
             for inc in incidents:
                 session.add(inc)
 
-        # Check evidence
-        existing_evidence = session.exec(select(EvidenceRow)).all()
-        if not existing_evidence:
-            print("Seeding PipeGen IR graph and TensorRT report evidence...")
-            evidence_items = [
-                EvidenceRow(
-                    kind="ir_graph",
-                    title="CraftifAI PipeGen 5-Stage Vision Pipeline IR",
-                    file_path="data/evidence/pipegen_ir_graph.svg",
-                    description="PipeGen compiled 5-stage DeepStream 7.1 GStreamer pipeline with TensorRT 10 PGIE, NVTracker, NVDSAnalytics, and MQTT broker sink."
-                ),
-                EvidenceRow(
-                    kind="trt_report",
-                    title="NVIDIA TensorRT 10.x Benchmark & Speed Report",
-                    file_path="data/evidence/tensorrt_speed_report.svg",
-                    description="NVIDIA RTX 3050 Laptop GPU benchmark showing 3.24x speedup with INT8 quantization (156.3 FPS, 6.3ms latency) vs FP32 baseline."
-                ),
-            ]
-            for item in evidence_items:
-                session.add(item)
-
         session.commit()
-    print("Database seeded successfully!")
+    print("Database seeded successfully! (all rows marked data_origin='seed')")
+
 
 if __name__ == "__main__":
     seed()

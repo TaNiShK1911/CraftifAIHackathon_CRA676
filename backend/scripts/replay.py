@@ -61,9 +61,11 @@ async def replay(file_path: Path, speed: float = 1.0) -> None:
 
     async with aiomqtt.Client(hostname=settings.mqtt_host, port=settings.mqtt_port) as client:
         for i, record in enumerate(records):
+            # Tag as replay so the backend marks data_origin='replay'
+            record["_data_origin"] = "replay"
             payload = json.dumps(record).encode()
             await client.publish(topic, payload=payload)
-            print(f"  [{i+1}/{len(records)}] published frame {record.get('frame_num', '?')}")
+            print(f"  [{i+1}/{len(records)}] published frame {record.get('frame_num', '?')} (REPLAY)")
             delay = 1.0 / (30.0 * speed)  # assume 30 fps source
             await asyncio.sleep(delay)
 

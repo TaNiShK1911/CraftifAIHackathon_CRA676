@@ -233,6 +233,7 @@ async def _open_incident(
         event_count=1,
         max_confidence=event.confidence,
         snapshot_path=event.attributes.get("snapshot_path"),
+        data_origin=event.data_origin,
     )
     with Session(get_engine()) as session:
         session.add(row)
@@ -327,6 +328,7 @@ async def _store_event(event: CanonicalEvent) -> None:
         bbox_json=json.dumps(list(event.bbox)) if event.bbox else None,
         zone_id=event.zone_id,
         raw_json=json.dumps(event.raw) if event.raw else None,
+        data_origin=event.data_origin,
     )
     with Session(get_engine()) as session:
         session.add(row)
