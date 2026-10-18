@@ -71,7 +71,7 @@ function Kpi({ label, value, tone }: { label: string; value: string | number; to
 function LiveMonitor() {
   const now = useNow();
   const [sel, setSel] = useState<number | null>(null);
-  const [liveOnly, setLiveOnly] = useState(false);
+  const [liveOnly, setLiveOnly] = useState(true);
   const { freshIds, lastMessageAt } = useLive();
   const incidents = useQuery(incidentsQuery(liveOnly ? "live" : undefined));
   const summary = useQuery(summaryQuery());
@@ -99,7 +99,10 @@ function LiveMonitor() {
           <Kpi label="MTTA" value={s?.mtta_seconds != null ? duration(s.mtta_seconds) : dash} />
         </div>
         <section className="panel p-3">
-          <p className="label-caps mb-2">Incidents by type</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="label-caps">Incidents by type</p>
+            <DataOriginChip origin={liveOnly ? "live" : "seed"} />
+          </div>
           <div className="h-32">
             <ResponsiveContainer>
               <BarChart data={byType} layout="vertical" margin={{ left: 10 }}>
@@ -166,7 +169,10 @@ function LiveMonitor() {
       </section>
 
       <section className="panel p-3 lg:col-start-1 lg:row-start-2">
-        <p className="label-caps mb-2">Violations per minute · last 60 min</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="label-caps">Violations per minute · last 60 min</p>
+          <DataOriginChip origin={liveOnly ? "live" : "seed"} />
+        </div>
         <div className="h-64">
           {ts.data?.length ? (
             <ResponsiveContainer>

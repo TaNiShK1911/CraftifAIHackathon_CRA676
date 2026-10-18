@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   { Icon: Activity, title: "Live incident feed", text: "Zone intrusions, PPE violations and loitering stream in within a second." },
   { Icon: BellRing, title: "Critical alerts", text: "Full-width banner for critical events, acknowledged with one click." },
-  { Icon: Cpu, title: "Edge evidence", text: "TensorRT speed report and FP32 / FP16 / INT8 trade-offs, side by side." },
+  { Icon: Cpu, title: "Edge evidence", text: "Real TensorRT speed reports and FP32 on-device execution metrics." },
 ];
 
 function Landing() {

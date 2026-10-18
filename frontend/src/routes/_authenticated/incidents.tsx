@@ -39,7 +39,7 @@ function Filter<T extends string>({ label, value, onChange, options }: { label: 
 }
 
 function IncidentsPage() {
-  const [origin, setOrigin] = useState<DataOrigin | "all">("all");
+  const [origin, setOrigin] = useState<DataOrigin | "all">("live");
   const { data, isError, isLoading } = useQuery(incidentsQuery(origin === "all" ? undefined : origin));
   const m = useIncidentStatus();
   const [sel, setSel] = useState<number | null>(null);

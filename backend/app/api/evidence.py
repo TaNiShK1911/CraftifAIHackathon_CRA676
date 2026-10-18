@@ -13,13 +13,56 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlmodel import Session, select
 from typing import Optional
 
+from app.config import settings
 from app.db import get_session
 from app.models import EvidenceRow
 
 router = APIRouter()
 
-_EVIDENCE_DIR = Path("data/evidence")
+_EVIDENCE_DIR = Path(settings.db_path).parent / "evidence"
 _EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def seed_verified_evidence(session: Session) -> None:
+    """Populate default verified evidence rows from docs/evidence if empty."""
+    existing = session.exec(select(EvidenceRow)).first()
+    if existing:
+        return
+    items = [
+        EvidenceRow(
+            kind="ir_graph",
+            title="Pipeline IR Interactive Node Graph",
+            description="PipeGen interactive node graph DAG with parallel inference and safety alerting",
+            file_path=str(_EVIDENCE_DIR / "02_pipeline_ir_node_graph.png"),
+        ),
+        EvidenceRow(
+            kind="trt_report",
+            title="TensorRT Speed Report (best PPE FP32)",
+            description="Real TensorRT FP32 compilation and layer speed report on RTX 3050 Laptop GPU (15.11 ms, 66.2 FPS)",
+            file_path=str(_EVIDENCE_DIR / "04_speed_report_best_ppe_fp32.png"),
+        ),
+        EvidenceRow(
+            kind="model_selection",
+            title="Model Selection Stage",
+            description="Model selection stage matching yolo11s and best.onnx",
+            file_path=str(_EVIDENCE_DIR / "03_model_selection.png"),
+        ),
+        EvidenceRow(
+            kind="compilation",
+            title="Pipeline Compilation Stage",
+            description="Both FP32 engines compiled and bound to inference nodes",
+            file_path=str(_EVIDENCE_DIR / "05_compile_both_engines.png"),
+        ),
+        EvidenceRow(
+            kind="live_run",
+            title="Live Run Completed",
+            description="DeepStream live pipeline execution completed with 395 frames",
+            file_path=str(_EVIDENCE_DIR / "06_live_run_completed.png"),
+        ),
+    ]
+    for item in items:
+        session.add(item)
+    session.commit()
 
 
 def _to_response(row: EvidenceRow) -> dict:
@@ -42,6 +85,7 @@ def list_evidence(
     kind: Optional[str] = Query(default=None),
     session: Session = Depends(get_session),
 ) -> list[dict]:
+    seed_verified_evidence(session)
     stmt = select(EvidenceRow)
     if kind:
         stmt = stmt.where(EvidenceRow.kind == kind)
