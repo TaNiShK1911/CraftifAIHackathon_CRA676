@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { apiUrl, evidenceQuery, runsQuery, type Evidence } from "@/lib/api";
-import { EmptyState } from "@/components/sg/chips";
+import { DataOriginChip, EmptyState } from "@/components/sg/chips";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
   head: () => ({
@@ -28,7 +28,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Shot({ items, label }: { items: Evidence[] | undefined; label: string }) {
-  if (!items?.length) return <EmptyState title={`No ${label} uploaded yet`}>Captured from PipeGen and served by the backend.</EmptyState>;
+  if (!items?.length) return <EmptyState title={`No ${label} uploaded yet`}>Awaiting real capture from PipeGen. See docs/evidence/README.md.</EmptyState>;
   return (
     <div className="grid gap-3">
       {items.map((e) => (
@@ -85,7 +85,7 @@ function PipelinePage() {
             <table className="w-full font-mono text-base">
               <thead>
                 <tr className="border-b text-left">
-                  {["Model", "Prec.", "FPS", "Latency", "Power", "mAP"].map((h) => <th key={h} className="label-caps py-2">{h}</th>)}
+                  {["Model", "Prec.", "Origin", "FPS", "Latency", "Power", "mAP"].map((h) => <th key={h} className="label-caps py-2">{h}</th>)}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -93,6 +93,7 @@ function PipelinePage() {
                   <tr key={r.id}>
                     <td className="py-2">{r.model_name}</td>
                     <td className="py-2 font-bold text-primary">{r.precision}</td>
+                    <td className="py-2"><DataOriginChip origin={r.data_origin} /></td>
                     <td className="py-2">{r.fps.toFixed(1)}</td>
                     <td className="py-2">{r.latency_ms.toFixed(1)} ms</td>
                     <td className="py-2">{r.power_w != null ? `${r.power_w.toFixed(1)} W` : "—"}</td>
@@ -102,7 +103,12 @@ function PipelinePage() {
               </tbody>
             </table>
           ) : (
-            <EmptyState title={runs.isError ? "Backend unreachable" : "No pipeline runs recorded yet"} />
+            <EmptyState title={runs.isError ? "Backend unreachable" : "No PipeGen speed report imported yet"}>
+              <p>To display verified benchmarks, export PipeGen's speed report into <code className="font-mono text-foreground">captured/</code> and run:</p>
+              <code className="mt-2 block rounded bg-background p-2 font-mono text-xs">
+                python scripts/import_speed_report.py captured/speed_report.csv
+              </code>
+            </EmptyState>
           )}
         </Section>
         <Section title="Edge optimization · FPS by precision">
@@ -120,16 +126,20 @@ function PipelinePage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState title="Awaiting benchmark runs" />
+              <EmptyState title="Awaiting real benchmark import" />
             )}
           </div>
         </Section>
       </div>
 
       <Section title="Run it yourself">
-        <pre className="overflow-x-auto rounded-sm bg-background p-4 font-mono text-sm">{`./run.sh --source cam0 --precision INT8
-mosquitto_sub -t 'siteguard/+/events' -v`}</pre>
+        <pre className="overflow-x-auto rounded-sm bg-background p-4 font-mono text-sm">{`# Run the PipeGen-generated pipeline
+cd captured/export && ./run.sh --source cam0 --precision INT8
+
+# Subscribe to real-time events
+mosquitto_sub -t '#' -v`}</pre>
       </Section>
     </div>
   );
 }
+

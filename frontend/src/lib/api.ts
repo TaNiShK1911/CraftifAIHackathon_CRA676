@@ -3,6 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 export type Severity = "MEDIUM" | "HIGH" | "CRITICAL";
 export type Status = "OPEN" | "ACKNOWLEDGED" | "RESOLVED";
 export type IncidentType = "ZONE_INTRUSION" | "PPE_VIOLATION" | "LOITERING";
+export type DataOrigin = "live" | "replay" | "seed";
 
 export interface Incident {
   id: number;
@@ -18,6 +19,7 @@ export interface Incident {
   max_confidence: number;
   snapshot_path: string | null;
   acknowledged_at?: string | null;
+  data_origin: DataOrigin;
 }
 
 export interface EventDTO {
@@ -35,6 +37,7 @@ export interface PipelineRun {
   latency_ms: number;
   power_w: number | null;
   accuracy_map: number | null;
+  data_origin: DataOrigin;
 }
 
 export interface Evidence {
@@ -62,9 +65,11 @@ export interface Health {
   status: string;
   mqtt_connected?: boolean;
   last_message_age_s?: number | null;
+  last_live_message_age_seconds?: number | null;
   dropped?: number;
-  fps?: number | null;
   thresholds?: Record<string, unknown>;
+  events_by_origin?: Record<string, number>;
+  incidents_by_origin?: Record<string, number>;
 }
 
 export const API_URL: string = (import.meta.env["VITE_API_URL"] as string | undefined) ?? "";
@@ -87,8 +92,12 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
 const live = { retry: false, refetchOnWindowFocus: true } as const;
 
-export const incidentsQuery = () =>
-  queryOptions({ queryKey: ["incidents"], queryFn: () => api<Incident[]>("/api/incidents"), ...live });
+export const incidentsQuery = (dataOrigin?: DataOrigin) =>
+  queryOptions({
+    queryKey: ["incidents", dataOrigin ?? "all"],
+    queryFn: () => api<Incident[]>(`/api/incidents${dataOrigin ? `?data_origin=${dataOrigin}` : ""}`),
+    ...live,
+  });
 export const summaryQuery = () =>
   queryOptions({ queryKey: ["stats", "summary"], queryFn: () => api<StatsSummary>("/api/stats/summary"), ...live });
 export const timeseriesQuery = () =>

@@ -64,9 +64,7 @@ def validate_and_insert(rows: list[dict], source_filename: str, model_name: str)
         for row in rows:
             missing = REQUIRED_FIELDS - set(row.keys())
             if missing:
-                print(f"ERROR: Missing required fields {missing} in row: {row}")
-                print("This script never fills defaults. Fix the source file.")
-                sys.exit(1)
+                raise ValueError(f"missing required fields {missing} in row: {row}")
 
             pr = PipelineRunRow(
                 model_name=model_name,
@@ -114,7 +112,13 @@ def main():
         print("No rows found in the file.")
         sys.exit(1)
 
-    validate_and_insert(rows, args.file.name, args.model_name)
+    try:
+        validate_and_insert(rows, args.file.name, args.model_name)
+    except Exception as exc:
+        print(f"ERROR: {exc}")
+        print("This script never fills defaults. Fix the source file.")
+        sys.exit(1)
+
 
 
 if __name__ == "__main__":

@@ -39,7 +39,8 @@ export function Shell({ children }: { children: ReactNode }) {
   };
   const offline = health.isError;
   const mqtt = health.data?.mqtt_connected;
-  const fps = health.data?.fps;
+  const msgAge = health.data?.last_message_age_s;
+  const liveIncidents = health.data?.incidents_by_origin?.live ?? 0;
   const crit = criticals[0];
 
   return (
@@ -74,7 +75,14 @@ export function Shell({ children }: { children: ReactNode }) {
             ) : mqtt ? (
               <Badge tone="ok">BROKER ✓</Badge>
             ) : null}
-            <Badge tone={fps ? "ok" : "warn"}>FPS {fps != null ? Math.round(fps) : "—"}</Badge>
+            {msgAge != null ? (
+              <Badge tone="ok">FEED: {Math.round(msgAge)}s</Badge>
+            ) : (
+              <Badge tone="warn">FEED: IDLE</Badge>
+            )}
+            {liveIncidents > 0 ? (
+              <Badge tone="ok">LIVE: {liveIncidents}</Badge>
+            ) : null}
             <Button variant="ghost" size="icon" onClick={() => setMuted(!muted)} aria-label={muted ? "Unmute alerts" : "Mute alerts"}>
               {muted ? <VolumeX /> : <Volume2 />}
             </Button>

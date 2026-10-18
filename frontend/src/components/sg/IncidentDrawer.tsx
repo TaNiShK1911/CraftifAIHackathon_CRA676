@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { apiUrl, incidentEventsQuery, incidentsQuery } from "@/lib/api";
 import { TYPE_LABEL, clock, incidentDuration } from "@/lib/format";
 import { useIncidentStatus } from "@/lib/mutations";
-import { SeverityChip, StatusChip } from "./chips";
+import { DataOriginChip, SeverityChip, StatusChip } from "./chips";
 
 export function IncidentDrawer({ id, onClose }: { id: number | null; onClose: () => void }) {
   const { data: list } = useQuery(incidentsQuery());
@@ -22,8 +22,10 @@ export function IncidentDrawer({ id, onClose }: { id: number | null; onClose: ()
               <SheetTitle className="flex items-center gap-3 text-2xl">
                 <span className="font-mono text-muted-foreground">#{inc.id}</span> {TYPE_LABEL[inc.type]}
               </SheetTitle>
-              <SheetDescription className="flex gap-3">
-                <SeverityChip severity={inc.severity} /> <StatusChip status={inc.status} />
+              <SheetDescription className="flex items-center gap-2">
+                <SeverityChip severity={inc.severity} />
+                <StatusChip status={inc.status} />
+                <DataOriginChip origin={inc.data_origin} />
               </SheetDescription>
             </SheetHeader>
             <div className="space-y-5 px-4 pb-6">
@@ -34,6 +36,7 @@ export function IncidentDrawer({ id, onClose }: { id: number | null; onClose: ()
               )}
               <dl className="grid grid-cols-2 gap-3 font-mono text-sm">
                 {[
+                  ["Origin", inc.data_origin?.toUpperCase() ?? "UNKNOWN"],
                   ["Zone", inc.zone_id ?? "—"],
                   ["Track", inc.track_id != null ? `#${inc.track_id}` : "—"],
                   ["Source", inc.source_id],

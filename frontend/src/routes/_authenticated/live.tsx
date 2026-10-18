@@ -7,7 +7,7 @@ import { VIDEO_URL, healthQuery, incidentsQuery, summaryQuery, timeseriesQuery, 
 import { TYPE_LABEL, clock, duration, timeAgo } from "@/lib/format";
 import { useLive } from "@/lib/live";
 import { cn } from "@/lib/utils";
-import { EmptyState, SeverityChip } from "@/components/sg/chips";
+import { DataOriginChip, EmptyState, SeverityChip } from "@/components/sg/chips";
 import { IncidentDrawer } from "@/components/sg/IncidentDrawer";
 
 export const Route = createFileRoute("/_authenticated/live")({
@@ -71,8 +71,9 @@ function Kpi({ label, value, tone }: { label: string; value: string | number; to
 function LiveMonitor() {
   const now = useNow();
   const [sel, setSel] = useState<number | null>(null);
+  const [liveOnly, setLiveOnly] = useState(false);
   const { freshIds, lastMessageAt } = useLive();
-  const incidents = useQuery(incidentsQuery());
+  const incidents = useQuery(incidentsQuery(liveOnly ? "live" : undefined));
   const summary = useQuery(summaryQuery());
   const ts = useQuery(timeseriesQuery());
   const health = useQuery(healthQuery());
@@ -114,13 +115,25 @@ function LiveMonitor() {
 
       <section className="panel flex min-h-80 flex-col lg:col-start-2 lg:row-start-2">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <span className="label-caps">Live incident feed</span>
+          <div className="flex items-center gap-2">
+            <span className="label-caps">Live incident feed</span>
+            <button
+              type="button"
+              onClick={() => setLiveOnly(!liveOnly)}
+              className={cn(
+                "rounded border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase transition-colors",
+                liveOnly ? "border-ok bg-ok/10 text-ok" : "border-border text-muted-foreground hover:bg-accent",
+              )}
+            >
+              {liveOnly ? "✓ Live Only" : "All Origins"}
+            </button>
+          </div>
           <span className="font-mono text-xs text-muted-foreground">last msg {lastAge}</span>
         </div>
         <ul aria-live="polite" className="max-h-[420px] flex-1 divide-y overflow-y-auto">
           {feed.length === 0 ? (
-            <EmptyState icon={<Eye className="size-8" />} title={incidents.isError ? "Waiting for backend…" : "Watching… no violations detected"}>
-              FPS {health.data?.fps != null ? Math.round(health.data.fps) : dash} · last message {lastAge}
+            <EmptyState icon={<Eye className="size-8" />} title={incidents.isError ? "Waiting for backend…" : liveOnly ? "No live violations (watching…)" : "Watching… no violations detected"}>
+              MQTT {health.data?.mqtt_connected ? "connected" : "disconnected"} · last message {lastAge}
             </EmptyState>
           ) : (
             feed.map((i) => (
@@ -132,7 +145,10 @@ function LiveMonitor() {
                     freshIds.has(i.id) && "animate-flash-in",
                   )}
                 >
-                  <SeverityChip severity={i.severity} />
+                  <div className="flex items-center gap-1.5">
+                    <SeverityChip severity={i.severity} />
+                    <DataOriginChip origin={i.data_origin} />
+                  </div>
                   <span>
                     <span className="font-semibold">{TYPE_LABEL[i.type]}</span>
                     <span className="ml-2 font-mono text-sm text-muted-foreground">
