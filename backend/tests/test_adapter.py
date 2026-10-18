@@ -84,3 +84,60 @@ def test_adapter_survives_missing_fields():
     assert isinstance(events, list)
     if events:
         assert events[0].label == "person"
+
+
+def test_adapter_handles_real_pipegen_format():
+    payload = {
+        "frame": 30,
+        "source_id": 0,
+        "pts_ns": 1280000000,
+        "width": 2560,
+        "height": 1440,
+        "objects": [
+            {
+                "id": 0,
+                "class_id": 0,
+                "label": "person",
+                "confidence": 0.5682,
+                "bbox": {"left": 341.7, "top": 423.6, "width": 91.8, "height": 71.8},
+                "tracker_confidence": 1.0,
+            }
+        ],
+        "shapes": [
+            {
+                "kind": "polygon",
+                "points": [[256.0, 432.0], [1280.0, 432.0], [1280.0, 1152.0], [256.0, 1152.0]],
+                "label": "hazard_zone",
+            },
+            {
+                "kind": "box",
+                "x": 341.7,
+                "y": 423.6,
+                "w": 91.8,
+                "h": 71.8,
+                "label": "person IN_ZONE missing:hard hat,safety vest",
+                "id": 0,
+                "score": 1.0,
+            },
+        ],
+        "fields": {
+            "current_people": 1,
+            "current_in_zone": 1,
+            "track_0_in_zone": 1,
+            "track_0_helmet": 0,
+            "track_0_vest": 0,
+        },
+    }
+    events = normalize(payload)
+    assert len(events) >= 1
+    person_ev = next(e for e in events if e.label == "person")
+    assert person_ev.zone_id == "hazard_zone_1"
+    assert person_ev.track_id == 0
+    assert person_ev.bbox is not None
+    x, y, w, h = person_ev.bbox
+    assert 0.0 <= x <= 1.0 and 0.0 <= y <= 1.0
+    # Also verify that missing PPE generated canonical violation events
+    labels = {e.label for e in events}
+    assert "no_hardhat" in labels
+    assert "no_vest" in labels
+

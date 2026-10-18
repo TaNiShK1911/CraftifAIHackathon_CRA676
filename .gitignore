@@ -23,6 +23,8 @@ htmlcov/
 # PipeGen engines (large binary files)
 pipegen_export/*.engine
 pipegen_export/*.trt
+pipegen_export/models/*.plan
+pipegen_export/models/*.onnx
 
 # OS
 .DS_Store

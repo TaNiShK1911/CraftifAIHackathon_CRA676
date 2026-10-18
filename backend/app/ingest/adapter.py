@@ -84,15 +84,36 @@ def _parse_ts(raw: Any) -> datetime:
 
 
 def _normalize_bbox(
-    bbox: list[float] | None,
+    bbox: list[float] | dict[str, Any] | None,
     bbox_format: str,
     frame_size: list[int],
 ) -> tuple[float, float, float, float] | None:
     """Return normalised (x, y, w, h) in 0..1 range."""
-    if not bbox or len(bbox) < 4:
+    if not bbox:
         return None
 
-    fw, fh = float(frame_size[0]), float(frame_size[1])
+    fw = float(frame_size[0]) if frame_size and frame_size[0] > 0 else 1920.0
+    fh = float(frame_size[1]) if frame_size and frame_size[1] > 0 else 1080.0
+
+    if isinstance(bbox, dict):
+        x = float(bbox.get("left", bbox.get("x", 0.0)))
+        y = float(bbox.get("top", bbox.get("y", 0.0)))
+        w = float(bbox.get("width", bbox.get("w", 0.0)))
+        h = float(bbox.get("height", bbox.get("h", 0.0)))
+        if not (x <= 1.0 and y <= 1.0 and w <= 1.0 and h <= 1.0):
+            x = x / fw
+            y = y / fh
+            w = w / fw
+            h = h / fh
+        return (
+            max(0.0, min(1.0, x)),
+            max(0.0, min(1.0, y)),
+            max(0.0, min(1.0, w)),
+            max(0.0, min(1.0, h)),
+        )
+
+    if len(bbox) < 4:
+        return None
 
     if bbox_format == "xyxy":
         x1, y1, x2, y2 = bbox[:4]
@@ -106,7 +127,7 @@ def _normalize_bbox(
         w = bbox[2] / fw
         h = bbox[3] / fh
 
-    # If already normalised (all values ≤ 1), skip division
+    # If already normalised (all values <= 1), skip division
     if all(v <= 1.0 for v in (x, y, w, h)):
         if bbox_format == "xyxy":
             x, y, w, h = bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]
@@ -134,13 +155,23 @@ def normalize(raw_payload: dict[str, Any]) -> list[CanonicalEvent]:
     events: list[CanonicalEvent] = []
 
     try:
-        # Top-level fields
+        # Top-level fields with fallbacks for standard PipeGen naming
         source_id: str = str(
-            _resolve(raw_payload, cfg.get("source_id", "camera_id")) or "unknown"
+            _resolve(raw_payload, cfg.get("source_id", "source_id"))
+            or raw_payload.get("camera_id")
+            or raw_payload.get("source_id")
+            or "unknown"
         )
-        frame_id_raw = _resolve(raw_payload, cfg.get("frame_id", "frame_num"))
+        frame_id_raw = (
+            _resolve(raw_payload, cfg.get("frame_id", "frame"))
+            if _resolve(raw_payload, cfg.get("frame_id", "frame")) is not None
+            else raw_payload.get("frame_num")
+        )
         frame_id: int | None = int(frame_id_raw) if frame_id_raw is not None else None
-        ts = _parse_ts(_resolve(raw_payload, cfg.get("timestamp", "timestamp")))
+        ts = _parse_ts(
+            _resolve(raw_payload, cfg.get("timestamp", "pts_ns"))
+            or raw_payload.get("timestamp")
+        )
 
         # Per-object list
         objects_path: str = cfg.get("objects_path", "objects")
@@ -149,27 +180,48 @@ def normalize(raw_payload: dict[str, Any]) -> list[CanonicalEvent]:
         if not isinstance(objects, list):
             objects = [objects]
 
-        fields: dict[str, str] = cfg.get("fields", {})
-        bbox_format: str = cfg.get("bbox_format", "xyxy")
-        frame_size: list[int] = cfg.get("frame_size", [1920, 1080])
-        ppe_labels: list[str] = cfg.get("ppe_violation_labels", [])
+        fields_cfg: dict[str, str] = cfg.get("fields", {})
+        bbox_format: str = cfg.get("bbox_format", "xywh")
+        frame_w = raw_payload.get("width") or cfg.get("frame_size", [1920, 1080])[0]
+        frame_h = raw_payload.get("height") or cfg.get("frame_size", [1920, 1080])[1]
+        frame_size: list[int] = [int(frame_w), int(frame_h)]
+
+        # Check PipeGen fields and shapes for zone and PPE annotations
+        fields_data: dict[str, Any] = raw_payload.get("fields", {}) if isinstance(raw_payload.get("fields"), dict) else {}
+        shapes_data: list[dict[str, Any]] = raw_payload.get("shapes", []) if isinstance(raw_payload.get("shapes"), list) else []
 
         for obj in objects:
             if not isinstance(obj, dict):
                 continue
 
-            track_id_raw = obj.get(fields.get("track_id", "tracker_id"))
+            track_id_raw = obj.get(fields_cfg.get("track_id", "id")) if obj.get(fields_cfg.get("track_id", "id")) is not None else obj.get("tracker_id")
             track_id: int | None = int(track_id_raw) if track_id_raw is not None else None
 
-            label: str = str(obj.get(fields.get("label", "class"), "unknown"))
-            confidence: float = float(obj.get(fields.get("confidence", "conf"), 0.0))
-            bbox_raw: list[float] | None = obj.get(fields.get("bbox", "bbox"))
-            zone_id: str | None = obj.get(fields.get("zone_id", "roi"))
+            label: str = str(
+                obj.get(fields_cfg.get("label", "label"))
+                or obj.get("class")
+                or "unknown"
+            )
+            confidence: float = float(
+                obj.get(fields_cfg.get("confidence", "confidence"))
+                if obj.get(fields_cfg.get("confidence", "confidence")) is not None
+                else obj.get("conf", 0.0)
+            )
+            bbox_raw = obj.get(fields_cfg.get("bbox", "bbox"))
+            zone_id: str | None = obj.get(fields_cfg.get("zone_id", "zone_id")) or obj.get("roi")
+
+            # Check if this track is inside the hazard zone according to PipeGen custom process
+            if track_id is not None:
+                if fields_data.get(f"track_{track_id}_in_zone") == 1:
+                    zone_id = "hazard_zone_1"
+                for shape in shapes_data:
+                    if shape.get("id") == track_id and "IN_ZONE" in str(shape.get("label", "")):
+                        zone_id = "hazard_zone_1"
 
             bbox = _normalize_bbox(bbox_raw, bbox_format, frame_size)
 
             # Everything else goes into attributes
-            known_keys = set(fields.values()) | {"tracker_id", "class", "conf", "bbox", "roi"}
+            known_keys = set(fields_cfg.values()) | {"tracker_id", "id", "class", "label", "conf", "confidence", "bbox", "roi", "zone_id"}
             attributes = {k: v for k, v in obj.items() if k not in known_keys}
 
             event = CanonicalEvent(
@@ -186,6 +238,51 @@ def normalize(raw_payload: dict[str, Any]) -> list[CanonicalEvent]:
                 raw=raw_payload,
             )
             events.append(event)
+
+            # Check for PPE violations flagged by PipeGen for this track
+            if track_id is not None and label == "person":
+                missing_helmet = (fields_data.get(f"track_{track_id}_helmet") == 0)
+                missing_vest = (fields_data.get(f"track_{track_id}_vest") == 0)
+                for shape in shapes_data:
+                    if shape.get("id") == track_id:
+                        lbl = str(shape.get("label", ""))
+                        if "missing:hard hat" in lbl or "missing:helmet" in lbl:
+                            missing_helmet = True
+                        if "missing:safety vest" in lbl or "missing:vest" in lbl:
+                            missing_vest = True
+
+                if missing_helmet:
+                    events.append(
+                        CanonicalEvent(
+                            event_id=str(uuid.uuid4()),
+                            ts=ts,
+                            source_id=source_id,
+                            frame_id=frame_id,
+                            track_id=track_id,
+                            label="no_hardhat",
+                            confidence=confidence,
+                            bbox=bbox,
+                            zone_id=zone_id if zone_id else None,
+                            attributes={"violation": "missing_helmet", "person_track_id": track_id},
+                            raw=raw_payload,
+                        )
+                    )
+                if missing_vest:
+                    events.append(
+                        CanonicalEvent(
+                            event_id=str(uuid.uuid4()),
+                            ts=ts,
+                            source_id=source_id,
+                            frame_id=frame_id,
+                            track_id=track_id,
+                            label="no_vest",
+                            confidence=confidence,
+                            bbox=bbox,
+                            zone_id=zone_id if zone_id else None,
+                            attributes={"violation": "missing_vest", "person_track_id": track_id},
+                            raw=raw_payload,
+                        )
+                    )
 
     except Exception as exc:
         logger.warning("adapter.normalize error: %s | payload: %.200s", exc, raw_payload)

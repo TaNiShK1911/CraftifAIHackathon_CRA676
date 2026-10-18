@@ -78,7 +78,7 @@ def validate_and_insert(rows: list[dict], source_filename: str, model_name: str)
                 data_origin="live",
             )
             session.add(pr)
-            print(f"  → {pr.precision}: {pr.fps} FPS, {pr.latency_ms} ms")
+            print(f"  -> {pr.precision}: {pr.fps} FPS, {pr.latency_ms} ms")
 
         session.commit()
     print(f"Imported {len(rows)} pipeline runs from {source_filename}")

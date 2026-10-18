@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "project_name": "Construction Site Safety Monitoring",
+  "project_id": "65fb2507-da6e-4502-b2ed-4c8f644d736d",
+  "pipegen_version": "0.5.1",
+  "exported_at": "2026-10-18T16:10:08Z",
+  "origin": {
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "trt": "10.3.0",
+    "arch": "x86_64",
+    "image": "craftifaidocker/deepstream:7.1-amd64-v3",
+    "gpu_slug": "nvidia-geforce-rtx-3050-laptop-gpu"
+  },
+  "models": [
+    {
+      "name": "best",
+      "onnx": "models/best.onnx",
+      "plan": "models/best.fp32.plan",
+      "precision": "fp32",
+      "workspace_mb": 1024,
+      "builder_optimization_level": 3,
+      "origin_builder_optimization_level": 0,
+      "onnx_sha256": "ec997d7c22d913be68414fbe0414b002f3b89100a2ad983536ff2fae1a04aa5e",
+      "plan_sha256": "8cc3dab50328ef4a58f562dc845463f98cd6b60071186476794e683c67ac2027",
+      "engine_bytes": 17903636,
+      "layer_count": 196
+    },
+    {
+      "name": "yolo11s",
+      "onnx": "models/yolo11s.onnx",
+      "plan": "models/yolo11s.fp32.plan",
+      "precision": "fp32",
+      "workspace_mb": 1024,
+      "builder_optimization_level": 3,
+      "origin_builder_optimization_level": 0,
+      "onnx_sha256": "f8d06a921024c1a46091d48a59a8e377ba189f14250df167fe82f408ca37814b",
+      "plan_sha256": "8bee0885b0e72219ccb583ac996932e7fe09017f8031578d5512f3e63f8583af",
+      "engine_bytes": 49050964,
+      "layer_count": 234
+    }
+  ],
+  "io": {
+    "default_input_kind": "file",
+    "default_input": "demo.mp4",
+    "supported_inputs": [
+      "file",
+      "rtsp"
+    ],
+    "input_required": true,
+    "output_dir": "out",
+    "has_display_sink": false
+  },
+  "warnings": [
+    "the pipeline read demo.mp4, which lives outside the project and cannot be shipped \u2014 the recipient must pass --input"
+  ]
+}
