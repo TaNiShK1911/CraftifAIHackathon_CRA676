@@ -92,6 +92,7 @@ All captured artifacts are preserved in `captured/` and indexed in [`docs/eviden
 | TensorRT Speed Report (PPE FP32) | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_speed_report_best_ppe_fp32.png) | Real TensorRT FP32 compilation and layer speed breakdown for `best.onnx` on RTX 3050 Laptop GPU (15.11 ms latency, 66.2 FPS, 32.87 W) | **Verified** |
 | Pipeline Compilation Stage | [`docs/evidence/05_compile_both_engines.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_compile_both_engines.png) | Both FP32 engines bound (`node 3 -> yolo11s.fp32.plan`, `node 6 -> best.fp32.plan`) with "Pipeline compiled successfully" | **Verified** |
 | Live Run Completion | [`docs/evidence/06_live_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/06_live_run_completed.png) | "Pipeline run completed" with export trigger button | **Verified** |
+| Live Terminal Hardware Execution | [`docs/evidence/07_live_terminal_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/07_live_terminal_run_completed.png) | Terminal execution of `./run.sh` processing all 395 frames, 2,801 objects, and 395 MQTT messages (17.3 msg/s, 19.2s) | **Verified** |
 | Pipeline Export Directory | [`captured/export/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/export/) & [`pipegen_export/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/pipegen_export/) | Complete 26-file self-contained export bundle (`run.sh`, `manifest.json`, `PipelineIR.json`, `models/`, `pipeline/`) | **Verified** |
 | MQTT Capture Sample | [`captured/mqtt_sample.txt`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/mqtt_sample.txt) | 395 wire-format frame messages published on `pipegen/detection/demo` | **Verified** |
 | JSON Metadata Output | [`captured/json_sample/metadata.json`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/json_sample/metadata.json) | 872 KB per-frame detection, tracking, hazard zone, and PPE metadata | **Verified** |
@@ -99,7 +100,7 @@ All captured artifacts are preserved in `captured/` and indexed in [`docs/eviden
 
 ### Honestly Noted Missing Evidence
 1. **YOLO11s individual GUI speed card screenshot:** While `yolo11s` was compiled and profiled on-device (metrics verified in `speed_report.csv`), a screenshot of its individual layer-breakdown GUI card was not captured before stage transition.
-2. **DeepStream window overlay screenshot:** DeepStream was run headless with `fakesink` inside Docker; a screenshot of a live X11 window overlay was not captured.
+2. **DeepStream graphical window overlay:** DeepStream was run with `fakesink` inside Docker; an X11 graphical rendering window overlay screenshot was not captured.
 
 ---
 
