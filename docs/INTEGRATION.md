@@ -2,7 +2,7 @@
 
 How **CraftifAI PipeGen**, the **backend** and the **frontend** connect, how to run the whole system, and how to map it to the hackathon's judging and submission rules.
 
-Read together with `BACKEND_IMPLEMENTATION_PLAN.md` and `FRONTEND_IMPLEMENTATION_PLAN.md`.
+This document details the architecture, operational run order, and data provenance requirements for integrating SiteGuard with PipeGen.
 
 ---
 
