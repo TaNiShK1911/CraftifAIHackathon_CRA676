@@ -56,7 +56,20 @@ def parse_json(path: Path) -> list[dict]:
     raise ValueError(f"Unexpected JSON structure in {path}")
 
 
-def validate_and_insert(rows: list[dict], source_filename: str, model_name: str) -> None:
+def _derive_model_name(row: dict, default_name: str) -> str:
+    if row.get("model_name") and str(row["model_name"]).strip():
+        return str(row["model_name"]).strip()
+    engine_path = row.get("engine_path")
+    if engine_path:
+        filename = Path(engine_path).name
+        # e.g. yolo11s.fp32.plan -> yolo11s, best.fp32.plan -> best
+        stem = filename.split(".")[0]
+        if stem:
+            return stem
+    return default_name
+
+
+def validate_and_insert(rows: list[dict], source_filename: str, model_name: str = "unknown") -> None:
     init_db()
     engine = get_engine()
 
@@ -66,19 +79,26 @@ def validate_and_insert(rows: list[dict], source_filename: str, model_name: str)
             if missing:
                 raise ValueError(f"missing required fields {missing} in row: {row}")
 
+            model = _derive_model_name(row, model_name)
+            power_val = row.get("power_w")
+            power_w = float(power_val) if power_val is not None and str(power_val).strip() != "" else None
+
+            acc_val = row.get("accuracy_map")
+            accuracy_map = float(acc_val) if acc_val is not None and str(acc_val).strip() != "" else None
+
             pr = PipelineRunRow(
-                model_name=model_name,
+                model_name=model,
                 precision=str(row["precision"]).upper(),
                 engine_path=row.get("engine_path"),
                 fps=float(row["fps"]),
                 latency_ms=float(row["latency_ms"]),
-                power_w=float(row["power_w"]) if row.get("power_w") else None,
-                accuracy_map=float(row["accuracy_map"]) if row.get("accuracy_map") else None,
+                power_w=power_w,
+                accuracy_map=accuracy_map,
                 notes=f"Imported from {source_filename}",
                 data_origin="live",
             )
             session.add(pr)
-            print(f"  -> {pr.precision}: {pr.fps} FPS, {pr.latency_ms} ms")
+            print(f"  -> {pr.model_name} ({pr.precision}): {pr.fps} FPS, {pr.latency_ms} ms, power={pr.power_w}, accuracy={pr.accuracy_map}")
 
         session.commit()
     print(f"Imported {len(rows)} pipeline runs from {source_filename}")

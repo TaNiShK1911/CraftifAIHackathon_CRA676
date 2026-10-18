@@ -21,14 +21,14 @@ class Settings(BaseSettings):
     # MQTT
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883
-    mqtt_topic: str = "pipegen/#"
+    mqtt_topic: str = "pipegen/detection/demo"
 
     # PipeGen output
     pipegen_output_dir: str = "/tmp/pipegen_out"
     media_video_path: str = "/tmp/pipegen_out/annotated.mp4"
 
     # Database
-    db_path: str = "./data/siteguard.db"
+    db_path: str = str(Path(__file__).resolve().parent.parent.parent / "data" / "siteguard.db")
 
     # CORS
     cors_origins: str = "http://localhost:5173"

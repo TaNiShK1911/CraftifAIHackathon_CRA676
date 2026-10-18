@@ -1,21 +1,25 @@
 # Evidence Directory (`docs/evidence/`)
 
-This directory contains real visual evidence for the SiteGuard submission.
+This directory contains real visual evidence captured directly from the CraftifAI PipeGen GUI running on an **NVIDIA GeForce RTX 3050 Laptop GPU** (WSL2 Ubuntu 24.04, Docker container `craftifaidocker/deepstream:7.1-amd64-v3`).
 
-## 1. Verified Dashboard UI Evidence
-These screenshots document the running web dashboard and its provenance mechanisms:
-- [`01_live_dashboard.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/01_live_dashboard.png) — Real-time live monitor feed, video panel, and incident stats
-- [`02_incidents_management.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_incidents_management.png) — Incidents table with status tracking, provenance chip, and acknowledge/resolve workflow
-- [`03_pipeline_and_evidence.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/03_pipeline_and_evidence.png) — Pipeline status and edge optimization overview
-- [`04_tensorrt_benchmarks.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_tensorrt_benchmarks.png) — Precision comparison table and latency breakdown view
-- [`05_system_diagnostics.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_system_diagnostics.png) — Real-time system health and broker telemetry
+## Evidence Index
 
-## 2. PipeGen Pipeline Execution Evidence (Captured Live from GPU)
-Captured from live execution of CraftifAI PipeGen inside Docker (`craftifaidocker/deepstream:7.1-amd64-v3`) running on NVIDIA GeForce RTX 3050 Laptop GPU (CUDA 13.1, Driver 591.74):
-- [`pipegen_02_pipeline_ir_graph.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/pipegen_02_pipeline_ir_graph.png) — PipeGen Pipeline IR node graph generated from English prompt with hazard zone polygon
-- [`pipegen_03_model_selection.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/pipegen_03_model_selection.png) — PipeGen Deep Search model selection matching person detector (`yolo11s.onnx`) and PPE detector (`best.onnx`)
-- [`pipegen_04_tensorrt_speed_report.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/pipegen_04_tensorrt_speed_report.png) — TensorRT engine compilation and speed report on RTX 3050
-- [`pipegen_05_pipeline_compilation.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/pipegen_05_pipeline_compilation.png) — DeepStream pipeline compilation output and binding of compiled `.plan` engines
-- [`pipegen_06_live_run.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/pipegen_06_live_run.png) — Completed pipeline execution (395 frames, 2801 objects processed) and export trigger
+| File | What It Really Shows | Requirement Supported | Status |
+|---|---|---|---|
+| [`02_pipeline_ir_node_graph.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph.png) | Interactive Node Graph in PipeGen showing the full DAG: Input (`demo.mp4`) &rarr; Preprocess &rarr; Inference (YOLO11s Person + YOLOv8n PPE) &rarr; Postprocess &rarr; Custom (Hungarian tracking, Hazard zone alert with polygon, PPE violation alert) &rarr; Output (MQTT `pipegen/detection/demo` + JSON) | Mandatory Track A: Pipeline IR Graph | **Verified** |
+| [`02_pipeline_ir_node_graph_upper.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph_upper.png) | Zoomed detail of upper DAG: Input file reading `demo.mp4`, parallel preprocessing letterboxing, and parallel inference nodes (YOLO11s COCO person detector + YOLOv8n 6-class PPE detector) | Supplementary Track A: Pipeline IR Graph Detail | **Verified** |
+| [`02_pipeline_ir_node_graph_lower.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph_lower.png) | Zoomed detail of lower DAG: Postprocess decoding &rarr; Hungarian person tracking &rarr; Hazard zone alert (marked polygon) &rarr; PPE violation alert &rarr; Output nodes (MQTT single + JSON single) | Supplementary Track A: Pipeline IR Graph Detail | **Verified** |
+| [`03_model_selection.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/03_model_selection.png) | PipeGen Model stage / Deep Search matching `yolo11s.onnx` (RestrictedAreaMonitoring) and `best.onnx` (ppe-kit) | Mandatory Track A: Model Selection & Catalog | **Verified** |
+| [`04_speed_report_best_ppe_fp32.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_speed_report_best_ppe_fp32.png) | Real TensorRT speed report for `best.onnx` (PPE detector) compiled to FP32: 196 TRT layers, 1.98 ms initial layers, 3.75 ms middle layers, 8.72 ms final layers (total 14.47 ms layer sum / 15.11 ms trtexec end-to-end, ~66.2 FPS, 32.87 W) | Mandatory Track A: TensorRT Engine & Speed Report | **Verified** |
+| [`05_compile_both_engines.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_compile_both_engines.png) | PipeGen Compiler stage showing both FP32 TensorRT engines bound to inference nodes (`node 3 -> yolo11s.fp32.plan`, `node 6 -> best.fp32.plan`) and "Pipeline compiled successfully" | Mandatory Track A: Compiler Stage & Engine Binding | **Verified** |
+| [`06_live_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/06_live_run_completed.png) | Live run completion status ("Pipeline run completed") with export trigger button | Mandatory Track A: Live Run & Export Trigger | **Verified** |
 
-> Note: All legacy unverified SVGs were moved to [`legacy_unverified/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/legacy_unverified/). Every screenshot in this directory is a genuine PNG captured from actual software execution.
+## Missing / Incomplete Visual Evidence
+1. **Speed-report screenshot for `yolo11s`**: While `yolo11s` was compiled and profiled on-device (metrics recorded in [`captured/speed_report.csv`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/speed_report.csv) and `ModelStage.json`), a screenshot of its individual layer-breakdown card in the GUI was not captured before moving to the next stage.
+2. **DeepStream rendering window / terminal capture**: DeepStream was run headless with `fakesink` inside Docker; a screenshot of the video overlay window with terminal was not captured.
+
+## Quarantined Legacy Assets (`legacy_unverified/`)
+All hand-drawn SVGs and pre-run seeded dashboard screenshots have been moved out of this directory to [`legacy_unverified/`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/legacy_unverified/):
+- `legacy_unverified/pipegen_ir_graph.svg` (Hand-drawn SVG)
+- `legacy_unverified/tensorrt_speed_report.svg` (Hand-drawn SVG)
+- `legacy_unverified/01_live_dashboard.png` through `05_system_diagnostics.png` (Screenshots displaying synthetic seed data, quarantined to preserve strict provenance)

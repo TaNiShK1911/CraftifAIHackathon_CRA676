@@ -296,7 +296,17 @@ async def _escalate(state: IncidentState, event: CanonicalEvent) -> None:
         track_id=event.track_id,
         zone_id=event.zone_id,
     )
-    await _open_incident(event, new_key, IncidentType.LOITERING, Severity.CRITICAL)
+    new_id = await _open_incident(event, new_key, IncidentType.LOITERING, Severity.CRITICAL)
+    now_mono = time.monotonic()
+    _states[new_key.as_tuple()] = IncidentState(
+        key=new_key,
+        incident_id=new_id,
+        severity=Severity.CRITICAL,
+        first_seen=now_mono,
+        last_seen=now_mono,
+        debounce_count=settings.min_consecutive_frames,
+        open=True,
+    )
 
     # Also upgrade original incident to CRITICAL
     with Session(get_engine()) as session:

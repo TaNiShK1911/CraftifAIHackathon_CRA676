@@ -212,3 +212,49 @@ def test_import_speed_report_validation(tmp_path):
     bad_rows = parse_csv(invalid_csv)
     with pytest.raises(ValueError, match="missing required fields"):
         validate_and_insert(bad_rows, source_filename="invalid.csv", model_name="test-model")
+
+    # Valid CSV with empty power/accuracy and engine_path derivation
+    multi_csv = tmp_path / "multi_speed_report.csv"
+    with open(multi_csv, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["precision", "fps", "latency_ms", "power_w", "accuracy_map", "engine_path"])
+        writer.writeheader()
+        writer.writerow({
+            "precision": "FP32",
+            "fps": "30.75",
+            "latency_ms": "32.525",
+            "power_w": "32.44",
+            "accuracy_map": "",
+            "engine_path": "model_stage/yolo11s.fp32.plan",
+        })
+        writer.writerow({
+            "precision": "FP32",
+            "fps": "66.2",
+            "latency_ms": "15.105",
+            "power_w": "",
+            "accuracy_map": "",
+            "engine_path": "model_stage/6-best/best.fp32.plan",
+        })
+
+    multi_rows = parse_csv(multi_csv)
+    validate_and_insert(multi_rows, source_filename="multi_speed_report.csv")
+
+    from app.db import get_engine
+    from app.models import PipelineRunRow
+    from sqlmodel import Session, select
+
+    with Session(get_engine()) as session:
+        imported = session.exec(
+            select(PipelineRunRow).where(PipelineRunRow.notes == "Imported from multi_speed_report.csv")
+        ).all()
+        assert len(imported) == 2
+        models = {r.model_name for r in imported}
+        assert "yolo11s" in models
+        assert "best" in models
+        for r in imported:
+            assert r.data_origin == "live"
+            assert r.accuracy_map is None
+        yolo_run = next(r for r in imported if r.model_name == "yolo11s")
+        assert yolo_run.power_w == 32.44
+        best_run = next(r for r in imported if r.model_name == "best")
+        assert best_run.power_w is None
+

@@ -60,17 +60,13 @@ flowchart LR
 
 | Stage | What we did | Evidence |
 |---|---|---|
-| 1. Requirement | `"Detect people on a construction site video, track them, flag anyone inside the marked hazard zone and anyone without a hard hat or safety vest, and publish alerts over MQTT with a JSON log."` | Not yet verified |
-| 2. Pipeline IR | PipeGen-generated DeepStream node graph | Not yet verified — awaiting real PipeGen export in `captured/` |
-| 3. Model | Model selected via PipeGen catalog/Deep Search | Not yet verified |
-| 4. Compiler | TensorRT FP16 and INT8 compiled engines | Not yet verified — awaiting speed report from `captured/speed_report.*` |
-| 5. Run & Dashboard | Real-time edge monitor, ingesting MQTT & JSON telemetry | Not yet verified |
+| 1. Requirement | Defined safety requirement with hazard zone polygon vertices `[[256, 432], [1280, 432], [1280, 1152], [256, 1152]]` on `demo.mp4` | [`captured/export/PipelineIR.json`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/export/PipelineIR.json) |
+| 2. Pipeline IR | PipeGen-generated interactive DAG (Input &rarr; Preprocess &rarr; Inference &rarr; Postprocess &rarr; Tracking &rarr; Hazard Zone &rarr; PPE Alert &rarr; MQTT/JSON) | [`docs/evidence/02_pipeline_ir_node_graph.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/02_pipeline_ir_node_graph.png) |
+| 3. Model | Deep Search model selection matching `yolo11s.onnx` (RestrictedAreaMonitoring) and `best.onnx` (ppe-kit) | [`docs/evidence/03_model_selection.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/03_model_selection.png) |
+| 4. Compiler | Compiled TensorRT FP32 engines (`yolo11s.fp32.plan`, `best.fp32.plan`) with layer-by-layer profiling on RTX 3050 | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/04_speed_report_best_ppe_fp32.png), [`docs/evidence/05_compile_both_engines.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/05_compile_both_engines.png) |
+| 5. Run & Dashboard | DeepStream execution processing 395 frames, publishing live telemetry to Mosquitto MQTT & writing JSON metadata | [`docs/evidence/06_live_run_completed.png`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/docs/evidence/06_live_run_completed.png), [`captured/mqtt_sample.txt`](file:///c:/Users/TANISHK%20JI/OneDrive/Desktop/SiteGuard/captured/mqtt_sample.txt) |
 
-**Inputs:** `demo.mp4` (video file) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification · **Precision:** FP16 (primary), INT8 (Edge Optimization bonus) · **Outputs:** Mosquitto MQTT, JSON metadata, annotated video feed
-
-### Edge Optimization bonus: results
-
-> Benchmark numbers will be filled from `captured/speed_report.*` once a real PipeGen run is completed. See `backend/scripts/import_speed_report.py`.
+**Inputs:** `demo.mp4` (2560x1440, 16s, 395 frames) · **Tasks:** person detection, multi-object tracking, ROI hazard zone intrusion, PPE verification (hard hat & vest) · **Models:** `yolo11s` (person detector), `best` (six-class PPE detector) · **Precision:** FP32 for both models (INT8 not run) · **Outputs:** Mosquitto MQTT (`pipegen/detection/demo`), JSON metadata (`metadata.json`)
 
 ## Data provenance
 
@@ -226,12 +222,12 @@ Backend tests use a fixture in `backend/tests/fixtures/`. A development-only rep
 
 ## Verified TensorRT Benchmark Results (NVIDIA RTX 3050 Laptop GPU)
 
-All metrics were profiled on hardware using `trtexec` and `nvidia-smi` inside the PipeGen environment:
+All metrics were profiled on hardware using `trtexec` and `nvidia-smi` inside the PipeGen environment (sourced directly from `captured/speed_report.csv`):
 
-| Pipeline Stage | Model | Precision | Engine Size | TRT Layers | Latency (ms) | Throughput (FPS) | Power (W) |
-|---|---|---|---|---|---|---|---|
-| Primary Inference | `yolo11s.onnx` (Person) | FP32 | 49.1 MB | 234 | 32.53 ms | 30.75 FPS | 32.44 W |
-| Secondary Inference | `best.onnx` (PPE) | FP32 | 17.9 MB | 196 | 15.11 ms | 66.20 FPS | 32.87 W |
+| Pipeline Stage | Model | Precision | Engine Size | TRT Layers | Latency (ms) | Throughput (FPS) | Power (W) | Accuracy (mAP) |
+|---|---|---|---|---|---|---|---|---|
+| Primary Inference | `yolo11s` (Person) | FP32 | 49.1 MB | 234 | 32.53 ms | 30.75 FPS | 32.44 W | Not reported |
+| Secondary Inference | `best` (PPE) | FP32 | 17.9 MB | 196 | 15.11 ms | 66.20 FPS | 32.87 W | Not reported |
 
 Evidence screenshots and reports are stored in `docs/evidence/` and `captured/`.
 
@@ -242,7 +238,7 @@ Evidence screenshots and reports are stored in `docs/evidence/` and `captured/`.
 - [x] **Live run on a local NVIDIA GPU** — executed 395 frames on NVIDIA GeForce RTX 3050 Laptop GPU
 - [x] **Actionable output** (MQTT/JSON consumed into incidents and a dashboard) — live adapter calibrated and verified
 - [x] **PipeGen is load-bearing** (all perception is PipeGen-generated) — 0 lines of model inference code in repo
-- [ ] **Bonus: Edge Optimization** (INT8 vs FP16 trade-off) — requires upstream labeled calibration set; FP32 engines deployed as primary baseline
+- [ ] **Bonus: Edge Optimization** (INT8 vs FP16 trade-off) — INT8 not run (FP32 deployed as primary baseline)
 
 > Verified and audited in `VERIFICATION.md`. Every benchmark is backed by actual execution artifacts.
 
