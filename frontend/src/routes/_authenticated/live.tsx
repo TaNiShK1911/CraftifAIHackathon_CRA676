@@ -49,7 +49,14 @@ function VideoPanel() {
       <div className="relative aspect-video bg-background">
         {failed ? (
           <EmptyState icon={<MonitorPlay className="size-10" />} title="No video stream available">
-            Open the PipeGen live window on the demo machine, or bridge RTSP via MediaMTX and set VITE_VIDEO_URL.
+            <div>Open the PipeGen live window on the demo machine, or bridge RTSP via MediaMTX and set VITE_VIDEO_URL.</div>
+            <button
+              type="button"
+              onClick={() => setFailed(false)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded bg-primary/20 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/30 transition-colors cursor-pointer"
+            >
+              Retry video stream
+            </button>
           </EmptyState>
         ) : (
           <video className="size-full object-contain" src={VIDEO_URL} autoPlay muted loop playsInline onError={() => setFailed(true)} />

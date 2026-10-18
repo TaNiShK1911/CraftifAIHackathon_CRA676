@@ -135,6 +135,8 @@ async def serve_video():
     from fastapi.responses import FileResponse
     candidates = [
         Path(settings.media_video_path),
+        Path(__file__).resolve().parent.parent / "data" / "annotated.mp4",
+        Path("data/annotated.mp4"),
         _data_dir / "annotated.mp4",
         Path("demo.mp4"),
         Path("../demo.mp4"),
