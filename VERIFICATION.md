@@ -90,6 +90,7 @@ All captured artifacts are preserved in `captured/` and indexed in [`docs/eviden
 | Pipeline IR Graph (Lower Zoom) | [`docs/evidence/02_pipeline_ir_node_graph_lower.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/02_pipeline_ir_node_graph_lower.png) | High-resolution zoom of Hungarian person tracking, hazard zone alert, PPE violation alert, and MQTT/JSON outputs | **Verified** |
 | Model Selection Stage | [`docs/evidence/03_model_selection.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/03_model_selection.png) | PipeGen Model stage matching `yolo11s.onnx` and `best.onnx` from catalog | **Verified** |
 | TensorRT Speed Report (PPE FP32) | [`docs/evidence/04_speed_report_best_ppe_fp32.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/04_speed_report_best_ppe_fp32.png) | Real TensorRT FP32 compilation and layer speed breakdown for `best.onnx` on RTX 3050 Laptop GPU (15.11 ms latency, 66.2 FPS, 32.87 W) | **Verified** |
+| TensorRT Speed Report (YOLO11s FP32) | [`docs/evidence/04_speed_report_yolo11s_fp32.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/04_speed_report_yolo11s_fp32.png) | Real TensorRT FP32 compilation and layer speed breakdown for `yolo11s.onnx` on RTX 3050 Laptop GPU (34.538 ms latency, ~29 FPS, 32.7 W power, 234 TRT layers) | **Verified** |
 | Pipeline Compilation Stage | [`docs/evidence/05_compile_both_engines.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/05_compile_both_engines.png) | Both FP32 engines bound (`node 3 -> yolo11s.fp32.plan`, `node 6 -> best.fp32.plan`) with "Pipeline compiled successfully" | **Verified** |
 | Live Run Completion | [`docs/evidence/06_live_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/06_live_run_completed.png) | "Pipeline run completed" with export trigger button | **Verified** |
 | Live Terminal Hardware Execution | [`docs/evidence/07_live_terminal_run_completed.png`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/docs/evidence/07_live_terminal_run_completed.png) | Terminal execution of `./run.sh` processing all 395 frames, 2,801 objects, and 395 MQTT messages (17.3 msg/s, 19.2s) | **Verified** |
@@ -100,8 +101,7 @@ All captured artifacts are preserved in `captured/` and indexed in [`docs/eviden
 | Benchmarks CSV | [`captured/speed_report.csv`](https://github.com/TaNiShK1911/CraftifAIHackathon_CRA676/blob/main/captured/speed_report.csv) | Machine-readable profiling output imported into DB as `data_origin="live"` | **Verified** |
 
 ### Honestly Noted Missing Evidence
-1. **YOLO11s individual GUI speed card screenshot:** While `yolo11s` was compiled and profiled on-device (metrics verified in `speed_report.csv`), a screenshot of its individual layer-breakdown GUI card was not captured before stage transition.
-2. **DeepStream graphical window overlay:** DeepStream was run with `fakesink` inside Docker; an X11 graphical rendering window overlay screenshot was not captured.
+1. **DeepStream graphical window overlay:** DeepStream was run with `fakesink` inside Docker; an X11 graphical rendering window overlay screenshot was not captured.
 
 ---
 
